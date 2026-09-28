@@ -1,4 +1,4 @@
-import pandas as pd
+import csv
 import datetime
 from google_play_scraper import reviews, Sort
 from app_store_scraper import AppStore
@@ -11,38 +11,54 @@ today = datetime.datetime.now().strftime("%Y-%m-%d")
 
 def get_android_reviews():
     print("Fetching Android Reviews...")
+    review_list = []
     try:
         result, _ = reviews(ANDROID_PKG, lang='en', country='us', sort=Sort.NEWEST, count=50)
-        df = pd.DataFrame(result)[['userName', 'score', 'at', 'content']]
-        df['Platform'] = 'Google Play'
-        return df
+        for r in result:
+            review_list.append({
+                'Platform': 'Google Play',
+                'Author': r.get('userName', ''),
+                'Rating': r.get('score', ''),
+                'Date': str(r.get('at', '')),
+                'Review_Text': r.get('content', '')
+            })
     except Exception as e:
         print(f"Android Error: {e}")
-        return pd.DataFrame()
+    return review_list
 
 def get_ios_reviews():
     print("Fetching iOS Reviews...")
+    review_list = []
     try:
         app = AppStore(country='us', app_name=IOS_APP_NAME, app_id=IOS_APP_ID)
         app.review(how_many=50)
-        df = pd.DataFrame(app.reviews)[['userName', 'rating', 'date', 'review']]
-        df.columns = ['userName', 'score', 'at', 'content']
-        df['Platform'] = 'App Store'
-        return df
+        for r in app.reviews:
+            review_list.append({
+                'Platform': 'App Store',
+                'Author': r.get('userName', ''),
+                'Rating': r.get('rating', ''),
+                'Date': str(r.get('date', '')),
+                'Review_Text': r.get('review', '')
+            })
     except Exception as e:
         print(f"iOS Error: {e}")
-        return pd.DataFrame()
+    return review_list
 
 if __name__ == "__main__":
     print("Starting Multi-Platform Scraper...")
-    df_android = get_android_reviews()
-    df_ios = get_ios_reviews()
-    
-    all_data = pd.concat([df_android, df_ios], ignore_index=True)
-    
-    if not all_data.empty:
-        filename = f"all_reviews_{today}.csv"
-        all_data.to_csv(filename, index=False)
-        print(f"Success! {len(all_data)} total reviews saved to {filename}")
-    else:
-        print("No data found.")
+    all_reviews = []
+    all_reviews.extend(get_android_reviews())
+    all_reviews.extend(get_ios_reviews())
+
+    filename = f"all_reviews_{today}.csv"
+    fieldnames = ['Platform', 'Author', 'Rating', 'Date', 'Review_Text']
+
+    # File hamesha create hogi, chahe dummy IDs ki wajah se data 0 hi kyu na ho
+    with open(filename, mode='w', newline='', encoding='utf-8') as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        if all_reviews:
+            writer.writerows(all_reviews)
+            print(f"Success! {len(all_reviews)} reviews saved to {filename}")
+        else:
+            print(f"No reviews found for dummy IDs. Created empty template {filename}")
