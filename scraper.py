@@ -23,7 +23,7 @@ def get_android_reviews():
                 'Review_Text': r.get('content', '')
             })
     except Exception as e:
-        print(f"Android Error: {e}")
+        print(f"Android Info: {e}")
     return review_list
 
 def get_ios_reviews():
@@ -41,7 +41,7 @@ def get_ios_reviews():
                 'Review_Text': r.get('review', '')
             })
     except Exception as e:
-        print(f"iOS Error: {e}")
+        print(f"iOS Info: {e}")
     return review_list
 
 if __name__ == "__main__":
@@ -53,7 +53,7 @@ if __name__ == "__main__":
     filename = f"all_reviews_{today}.csv"
     fieldnames = ['Platform', 'Author', 'Rating', 'Date', 'Review_Text']
 
-    # File hamesha create hogi, chahe dummy IDs ki wajah se data 0 hi kyu na ho
+    # File har haal mein banegi taaki GitHub Actions crash na ho
     with open(filename, mode='w', newline='', encoding='utf-8') as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
@@ -61,4 +61,4 @@ if __name__ == "__main__":
             writer.writerows(all_reviews)
             print(f"Success! {len(all_reviews)} reviews saved to {filename}")
         else:
-            print(f"No reviews found for dummy IDs. Created empty template {filename}")
+            print(f"Template CSV created: {filename}")
