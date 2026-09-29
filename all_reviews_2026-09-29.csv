@@ -1,16 +1,4 @@
 Platform,Author,Title,Rating,Date,Review_Text
-Glassdoor,Client Support Specialist,Good learning experience with opportunities to grow,5,2026-09-28,The company gives you the opportunity to work directly with clients and understand their day-to-day challenges. Great team environment.
-Glassdoor,Software Engineer,Decent work environment and helpful people,5,2026-09-26,I get to work on actual product requirements and solve issues that have a direct impact on the production application.
-Glassdoor,QA Engineer,Collaborative and product-focused culture,4,2026-09-24,"The work culture is professional, and there is good exposure to real-time enterprise software releases and client solutions."
-Indeed,Business Analyst,Great Place for Career Growth and Teamwork,5,2026-09-27,Altametrics offers great opportunities for professional development. Challenging data-driven restaurant products.
-Indeed,Cloud Engineer,Stable work environment with collaborative engineering team,5,2026-09-25,"Work focuses on cloud infrastructure, deployment monitoring, and production reliability. Supportive management."
-Comparably,Verified Employee,Supportive leadership & strong culture,5,2026-09-28,The team is easy to work with and people are willing to help when you run into a problem. Good knowledge sharing.
-Software Advice,Restaurant Administrator,Easy communication and shift scheduling,5,2026-09-26,Our timekeeping and scheduling procedures have been simplified by this user-friendly software.
-G2,Restaurant Tech Support Analyst,"Robust, Configurable Back Office",5,2026-09-27,Robust program with lots of options to make a great back office system. Configurable sections you can adjust as needed.
-G2,Operations Director,Seamless Food Forecasting & Labor Goals,5,2026-09-24,Altametrics integrates well into the enterprise restaurant ecosystem. Managers use it to manage labor goals smoothly.
-Capterra,Food & Beverage Manager,Fantastic Experience - Everything in one place,5,2026-09-25,I love being able to do everything from scheduling to inventory on any device without constant communication lag.
-Google,Client Reviewer,Reliable workforce management platform,5,2026-09-27,"Professional workforce management solutions, responsive support staff in Costa Mesa office."
-Yelp,Local Client,Solid corporate office & support,4,2026-09-23,Good technical support team and reliable restaurant management products.
 Google Play,Rana Rajpoot,,5,2026-09-28,A useful app for checking work schedules quickly from your phone.🇺🇲
 Google Play,PromptVerse,,5,2026-09-27,Zip Schedules is a useful app for managing work schedules and staying organized. The interface is simple and convenient to use. Great for keeping track of shifts and work updates🇱🇷
 Google Play,Ahtisham Ali,,5,2026-09-27,Useful scheduling app. It makes it easy to check work schedules and manage shifts in one place. Simple and convenient.🇺🇸
@@ -25,7 +13,7 @@ Google Play,Leo Archie,,5,2026-09-26,Very clean interface that makes viewing wee
 Google Play,Rose join Join,,5,2026-09-26,Requesting time off is super simple and quick 🇺🇸
 Google Play,Elizabeth,,5,2026-09-26,Awesome tool for keeping track of all my work shifts 🇺🇸
 Google Play,Aria Belle,,5,2026-09-25,"Great work management app! Makes scheduling, shift swaps and time-off requests super easy right from your phone. Very handy for both managers and employees to view schedules anytime, anywhere🇺🇸"
-Google Play,Devin King,,3,2026-09-25,trouble logging in and also resetting password
+Google Play,Devin W. King,,3,2026-09-25,trouble logging in and also resetting password
 Google Play,Sinha Rao,,5,2026-09-24,"Altametrics is a great platform for managing restaurant operations efficiently. I really like how it simplifies scheduling, employee management, inventory tracking, and reporting in one place. The features are easy to use and help save time while keeping daily operations organized. Overall, a very useful and reliable tool for restaurant management!"
 Google Play,Eli Parker,,5,2026-09-24,Very useful scheduling app! The interface is simple and easy to understand. It makes checking schedules and managing work time much more convenient. Smooth and helpful app! 👍%%
 Google Play,Abigail,,5,2026-09-24,"Altametrics Schedules is a lifesaver! Makes checking my work schedule super easy and fast. The app is clean, lightweight, and never glitches. Love that I can view my shifts anytime, anywhere. Highly recommended🇺🇸"
@@ -41,6 +29,26 @@ Google Play,Iqra Rajput,,5,2026-09-22,Best work schedule app! Easily check my sh
 Google Play,Teetaa Brand,,5,2026-09-22,"*""Super helpful app! Makes it so easy to check my work schedule anytime. Clean design, fast and reliable. A must-have for employees!""*"
 Google Play,TrickShots Loops,,5,2026-09-16,I can check my shifts and availability anytime from my phone 🇺🇸
 Google Play,Aurora Dream,,5,2026-09-15,The app makes it convenient to keep track of shifts and request time off. The layout is straightforward and easy to use.
+Google Play,AURELIA AURA,,5,2026-09-15,Simple and useful app for checking work schedules. I like that I can easily view my shifts and manage my availability.
+Google Play,Angelboy,,5,2026-09-15,Nice app.
+Google Play,Elizabeth queen,,5,2026-09-15,"I find the scheduling features straightforward and useful for keeping track of work shifts. The layout is easy to understand, and having the schedule available in one place is convenient."
+Google Play,Crystal Ellie,,5,2026-09-15,Notifications keep me updated instantly whenever my schedule changes.
+Google Play,Estelle lavinia,,5,2026-09-15,Puts my entire work schedule in my pocket so I always know when I’m working
+Google Play,Aria Chen,,5,2026-09-15,Makes it so easy to check my work schedule anytime without calling the manager.
+Google Play,Famous 12U,,5,2026-09-15,"Simple, reliable, and free — it puts all scheduling tools right in my pocket."
+Google Play,Haly Hailee,,5,2026-09-15,"Altametrics Schedule App makes staff scheduling super easy, fast and perfectly organized"
+Google Play,Daisy Daisy,,5,2026-09-15,Managers can approve requests instantly and keep everything organized in one place
+Google Play,John David,,5,2026-09-13,"syncing schedules directly to my phone's calendar is incredibly convenient.l get alerts,can plan around my shifts, and avoid my surprises.the app gives real time updates and has a user friendly management much easier for both managers and employees."
+Google Play,Zarish Khan,,5,2026-09-13,"Very useful app for managing schedules! Clean interface, fast performance and works smoothly. Makes tracking tasks and shifts so much easier."
+Google Play,JONYT,,5,2026-09-12,Useful app for making day schedules and accurate reminder easy to use and understandable interface .
+Google Play,Iris Felix,,5,2026-09-12,"Super organized and reliable. I love the real-time notifications and how easy it is to see my schedule anywhere, anytime."
+Google Play,Amoré Cronje,,5,2026-09-11,"A very useful and convenient app for managing work schedules. The interface is simple and easy to understand, making it easy to check shifts and stay organized. Everything feels well arranged and accessible. Overall, a helpful app for keeping track of work schedules and staying updated."
+Google Play,Loius Pasteur,,5,2026-09-10,"Altimetric is a useful and easy-to-use app for checking altitude and getting helpful information about your surroundings. The interface is simple, the readings are convenient to access, and it can be especially handy for hiking, traveling, and outdoor activities. Overall, a practical app that does what it’s designed to do. ⭐⭐⭐⭐⭐"
+Google Play,LORIE HATHEWAY,,5,2026-09-10,nice
+Google Play,Adam,,5,2026-09-10,"Zip Schedules makes staff scheduling painless — clear shifts, easy swaps, and everyone stays in the loop."
+Google Play,Rose,,5,2026-09-10,Great app..It makes managing work schedules and shifts simple and convenient. Easy to use and very helpful for keeping everything organized.
+Google Play,Moonlight Moonlight,,5,2026-09-09,Super easy to use! Scheduling and managing shifts has never been this smooth..
+Google Play,Lovely Saul,,5,2026-09-09,Best employee scheduling app — makes shift planning super easy and saves so much time..
 App Store,bagshaw_batteni,Simple Work Scheduling,5,2026-09-27,The scheduling features make routine work planning more convenient.
 App Store,Memeapple_,Good,5,2026-09-27,Good
 App Store,Scot Flynn,Planning Support,5,2026-09-27,Having schedule details available is useful when coordinating personal plans.
