@@ -3,7 +3,7 @@
 <title>Live Reviews Dashboard — Altametrics</title>
 <style>
   body{margin:0;background:#f4f5f7;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#1d2330;font-size:14px;line-height:1.45}
-  .wrap{{max-width:1020px;margin:0 auto;padding:24px 16px}}
+  .wrap{max-width:1020px;margin:0 auto;padding:24px 16px}
   .card{background:#fff;border:1px solid #e3e6eb;border-radius:10px;padding:20px 22px;margin:0 0 18px;box-shadow:0 1px 3px rgba(0,0,0,0.02)}
   h1{font-size:22px;margin:0 0 4px} h2{font-size:18px;margin:0 0 14px} h3{font-size:13px;margin:18px 0 8px;color:#4a5263;text-transform:uppercase;letter-spacing:.04em}
   .muted{color:#6b7385} .small{font-size:12px}
@@ -16,7 +16,7 @@
   .up{color:#137a3a;font-weight:600} .down{color:#b42318;font-weight:600} .flat{color:#6b7385}
   .bar{display:inline-block;height:10px;background:#3b6fd8;border-radius:2px;vertical-align:middle}
   .bar.rv{background:#e08a1e}
-  .rv-item{border-top:1px solid #eef0f3;padding:10px 0} .rv-item:first-child{border-top:none}
+  .rv-item{border-top:1px solid #eef0f3;padding:10px 0} .rv-item:first-child{{border-top:none}}
   .stars{color:#e0a100;letter-spacing:1px}
   .scroll{overflow-x:auto}
   .pill{display:inline-block;font-size:11px;background:#eef2fb;color:#2d56b3;border-radius:10px;padding:1px 8px;margin-left:6px;vertical-align:middle}
@@ -60,12 +60,13 @@
     </div>
   </div>
 
+  <!-- Company Reviews (Web Platforms Only) -->
   <div class="card">
-    <h2>Altametrics <span class="pill">Company reviews</span></h2>
+    <h2>Altametrics <span class="pill">Company reviews (Web)</span></h2>
     <table class="tiles"><tr>
       <td><div class="tile"><div class="k">New reviews in period</div><div class="v" id="tile-new">0</div></div></td>
       <td><div class="tile"><div class="k">Removed in period</div><div class="v">0</div></div></td>
-      <td><div class="tile"><div class="k">Total reviews, all sites</div><div class="v" id="tile-total">1,065</div></div></td>
+      <td><div class="tile"><div class="k">Total reviews, web sites</div><div class="v" id="tile-total">1,065</div></div></td>
       <td><div class="tile"><div class="k">Average rating</div><div class="v" id="tile-avg">4.76</div></div></td>
     </tr></table>
 
@@ -87,10 +88,11 @@
       </table>
     </div>
 
-    <h3>Reviews published in selected period</h3>
+    <h3>Web reviews published in selected period</h3>
     <div id="reviews-list-container"></div>
   </div>
 
+  <!-- Mobile Apps Section (Google Play & App Store Only) -->
   <div class="card">
     <h2>Mobile apps <span class="pill">Google Play &amp; App Store (USA)</span></h2>
     <div class="scroll">
@@ -111,7 +113,7 @@
 </div>
 
 <script>
-// Verified live data
+// Live reviews repository
 const RAW_REVIEWS = [
   {"Platform": "Google Play", "Author": "Restaurant GM", "Title": "", "Rating": 5, "Date": "2026-09-28", "Review_Text": "Altametrics Schedules makes swapping shifts and approving time-off simple for our store employees."},
   {"Platform": "Google Play", "Author": "Shift Supervisor", "Title": "", "Rating": 5, "Date": "2026-09-27", "Review_Text": "Much better notification alerts after recent updates. Keeps crew schedule transparent."},
@@ -218,13 +220,25 @@ function renderDashboard(startStr, endStr) {
   document.getElementById('report-date-range').innerText = 
     `${sDate.toLocaleDateString('en-US', opts)} – ${eDate.toLocaleDateString('en-US', opts)} · Interactive Live Filter`;
 
-  const filteredReviews = RAW_REVIEWS.filter(r => r.Date >= startStr && r.Date <= endStr);
-  const reviewsByPlat = {};
-  filteredReviews.forEach(r => {
-    if (!reviewsByPlat[r.Platform]) reviewsByPlat[r.Platform] = [];
-    reviewsByPlat[r.Platform].push(r);
+  const webPlatformNames = Object.keys(PLATFORM_DATA);
+
+  // 1. Separate Web Reviews and Mobile Reviews
+  const filteredWebReviews = RAW_REVIEWS.filter(r => webPlatformNames.includes(r.Platform) && r.Date >= startStr && r.Date <= endStr);
+  const filteredMobileReviews = RAW_REVIEWS.filter(r => !webPlatformNames.includes(r.Platform) && r.Date >= startStr && r.Date <= endStr);
+
+  const webReviewsByPlat = {};
+  filteredWebReviews.forEach(r => {
+    if (!webReviewsByPlat[r.Platform]) webReviewsByPlat[r.Platform] = [];
+    webReviewsByPlat[r.Platform].push(r);
   });
 
+  const mobileReviewsByPlat = {};
+  filteredMobileReviews.forEach(r => {
+    if (!mobileReviewsByPlat[r.Platform]) mobileReviewsByPlat[r.Platform] = [];
+    mobileReviewsByPlat[r.Platform].push(r);
+  });
+
+  // 2. Summary Tiles (Strictly Web Platforms - No Mobile Bleed)
   let totalAllReviews = 0;
   let weightedSum = 0;
   Object.keys(PLATFORM_DATA).forEach(k => {
@@ -234,16 +248,16 @@ function renderDashboard(startStr, endStr) {
   });
   const avgRating = totalAllReviews > 0 ? (weightedSum / totalAllReviews).toFixed(2) : "0.00";
 
-  document.getElementById('tile-new').innerText = filteredReviews.length;
-  document.getElementById('tile-total').innerText = totalAllReviews.toLocaleString();
-  document.getElementById('tile-avg').innerText = avgRating;
+  document.getElementById('tile-new').innerText = filteredWebReviews.length; // Shows exact 0 for web
+  document.getElementById('tile-total').innerText = totalAllReviews.toLocaleString(); // 1,065
+  document.getElementById('tile-avg').innerText = avgRating; // 4.76
 
-  // By-site table
+  // 3. By-Site Table (Web Only)
   const bySiteTbody = document.querySelector('#by-site-table tbody');
   bySiteTbody.innerHTML = '';
   Object.keys(PLATFORM_DATA).forEach(k => {
     const p = PLATFORM_DATA[k];
-    const platRevs = reviewsByPlat[k] || [];
+    const platRevs = webReviewsByPlat[k] || [];
     const newCount = platRevs.length;
     let avgScore = "—";
     if (newCount > 0) {
@@ -265,7 +279,7 @@ function renderDashboard(startStr, endStr) {
     `;
   });
 
-  // Daily table
+  // 4. Daily Table (Web Only)
   const days = getDaysArray(startStr, endStr);
   const theadTr = document.getElementById('daily-thead-tr');
   theadTr.innerHTML = '<th>Site</th>';
@@ -283,7 +297,7 @@ function renderDashboard(startStr, endStr) {
   const dailyTbody = document.querySelector('#daily-table tbody');
   dailyTbody.innerHTML = '';
   Object.keys(PLATFORM_DATA).forEach(k => {
-    const platRevs = reviewsByPlat[k] || [];
+    const platRevs = webReviewsByPlat[k] || [];
     let tds = '';
     if (showAllDays) {
       days.forEach(d => {
@@ -298,14 +312,14 @@ function renderDashboard(startStr, endStr) {
     dailyTbody.innerHTML += `<tr><td>${k}</td>${tds}<td><b>${platRevs.length}</b></td></tr>`;
   });
 
-  // Reviews snippet
+  // 5. Reviews Snippet (Only Web Reviews, No Duplicate Mobile App Reviews!)
   const revContainer = document.getElementById('reviews-list-container');
   revContainer.innerHTML = '';
-  if (filteredReviews.length === 0) {
-    revContainer.innerHTML = '<div class="muted small" style="padding:10px 0; font-style:italic">No new reviews published on review sites during this selected period.</div>';
+  if (filteredWebReviews.length === 0) {
+    revContainer.innerHTML = '<div class="muted small" style="padding:10px 0; font-style:italic">No new reviews published on employer &amp; B2B review sites during this selected period.</div>';
   } else {
-    Object.keys(reviewsByPlat).forEach(k => {
-      const pRevs = reviewsByPlat[k];
+    Object.keys(webReviewsByPlat).forEach(k => {
+      const pRevs = webReviewsByPlat[k];
       if (pRevs.length === 0) return;
       let itemsHtml = '';
       pRevs.forEach(r => {
@@ -326,12 +340,12 @@ function renderDashboard(startStr, endStr) {
     });
   }
 
-  // Mobile Summary Table
+  // 6. Mobile Summary Table
   const mobileTbody = document.querySelector('#mobile-summary-table tbody');
   mobileTbody.innerHTML = '';
   MOBILE_APPS.forEach(m => {
     const storeKey = m.store.includes("Android") ? "Google Play" : "App Store";
-    const storeRevs = reviewsByPlat[storeKey] || [];
+    const storeRevs = mobileReviewsByPlat[storeKey] || [];
     mobileTbody.innerHTML += `
       <tr>
         <td><b>${m.app_name}</b><div class="small muted">${m.id}</div></td>
@@ -348,14 +362,14 @@ function renderDashboard(startStr, endStr) {
     `;
   });
 
-  // Mobile Cards
+  // 7. Mobile Cards (Reviews appear ONLY here!)
   const cardsContainer = document.getElementById('mobile-detail-cards');
   cardsContainer.innerHTML = '';
   [
     { key: "Google Play", title: "Android (USA)", dlDaily: [340, 310, 420, 290, 450, 380, 310] },
     { key: "App Store", title: "iOS (USA)", dlDaily: [410, 390, 480, 360, 510, 470, 480] }
   ].forEach(store => {
-    const sRevs = reviewsByPlat[store.key] || [];
+    const sRevs = mobileReviewsByPlat[store.key] || [];
     let revsSnippet = '';
     if (sRevs.length > 0) {
       sRevs.forEach(r => {
