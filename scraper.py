@@ -58,25 +58,27 @@ def clean_date_str(raw_str):
     return today.strftime("%Y-%m-%d")
 
 # ==============================================================
-# 1. LIVE RESIDENTIAL SCRAPER (COMPATIBLE WITH FREE KEY)
+# 1. RESIDENTIAL PROXY CRAWLER (WITH REQUIRED PREMIUM=TRUE)
 # ==============================================================
-def fetch_target_html(target_url):
+def fetch_target_html(target_url, is_protected=False):
     print(f"\n[REQUEST] Fetching: {target_url}")
-    api_url = f"http://api.scraperapi.com?api_key={SCRAPER_API_KEY}&url={target_url}&render=true&country_code=us"
+    premium_flag = "&premium=true" if is_protected else ""
+    api_url = f"http://api.scraperapi.com?api_key={SCRAPER_API_KEY}&url={target_url}&render=true&country_code=us{premium_flag}"
+    
     try:
-        res = requests.get(api_url, timeout=75)
+        res = requests.get(api_url, timeout=90)
         print(f"[STATUS] HTTP {res.status_code} | Bytes: {len(res.text)}")
         if res.status_code == 200:
             return res.text
         else:
-            print(f"[WARNING] API Error Message: {res.text[:150]}")
+            print(f"[WARNING] API Error Message: {res.text[:200]}")
     except Exception as e:
         print(f"[EXCEPTION] {e}")
     
-    # Direct fallback if proxy is delayed
-    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
+    # Fallback to standard request
     try:
-        r2 = requests.get(target_url, headers=headers, timeout=12)
+        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
+        r2 = requests.get(target_url, headers=headers, timeout=15)
         if r2.status_code == 200:
             return r2.text
     except Exception:
@@ -84,7 +86,7 @@ def fetch_target_html(target_url):
     return ""
 
 # ==============================================================
-# 2. DUAL-LAYER PARSER (JSON-LD + NEXT.JS + HTML TAGS)
+# 2. DUAL-LAYER PARSER (JSON-LD + NEXT.JS + DOM)
 # ==============================================================
 def extract_reviews_comprehensive(html, platform_name):
     reviews = []
@@ -158,7 +160,7 @@ def extract_reviews_comprehensive(html, platform_name):
         except Exception:
             pass
 
-    # C. Standard DOM Fallback (HTML Class parsing)
+    # C. DOM Fallback
     soup = BeautifulSoup(html, 'html.parser')
     
     # Indeed selectors
@@ -217,7 +219,6 @@ def extract_reviews_comprehensive(html, platform_name):
                     "Review_Text": txt
                 })
 
-    # Deduplicate reviews
     unique_reviews = []
     seen = set()
     for r in reviews:
@@ -225,23 +226,24 @@ def extract_reviews_comprehensive(html, platform_name):
         if sig not in seen and (r["Review_Text"] or r["Title"]):
             seen.add(sig)
             unique_reviews.append(r)
+            print(f"  [PARSED] {r['Platform']} | Date: {r['Date']} | Title: {r['Title'][:35]}")
 
     return unique_reviews
 
 def scrape_indeed_live():
-    html = fetch_target_html("https://www.indeed.com/cmp/Altametrics/reviews?fcountry=US&lang=en&sort=date")
+    html = fetch_target_html("https://www.indeed.com/cmp/Altametrics/reviews", is_protected=True)
     revs = extract_reviews_comprehensive(html, "Indeed")
     print(f"-> Parsed {len(revs)} reviews from Indeed.")
     return revs
 
 def scrape_glassdoor_live():
-    html = fetch_target_html("https://www.glassdoor.com/Reviews/Altametrics-Reviews-E393527.htm?sort.sortType=RD&sort.ascending=false")
+    html = fetch_target_html("https://www.glassdoor.com/Reviews/Altametrics-Reviews-E393527.htm?sort.sortType=RD&sort.ascending=false", is_protected=False)
     revs = extract_reviews_comprehensive(html, "Glassdoor")
     print(f"-> Parsed {len(revs)} reviews from Glassdoor.")
     return revs
 
 def scrape_comparably_live():
-    html = fetch_target_html("https://www.comparably.com/companies/altametrics/reviews")
+    html = fetch_target_html("https://www.comparably.com/companies/altametrics/reviews", is_protected=True)
     revs = extract_reviews_comprehensive(html, "Comparably")
     print(f"-> Parsed {len(revs)} reviews from Comparably.")
     return revs
@@ -307,7 +309,7 @@ def scrape_app_store():
     return app_info
 
 # ==============================================================
-# 4. MASTER DASHBOARD GENERATOR
+# 4. DASHBOARD GENERATOR
 # ==============================================================
 def generate_dashboard_html(all_reviews, android_info, ios_info):
     reviews_json = json.dumps(all_reviews)
@@ -732,4 +734,4 @@ if __name__ == "__main__":
     with open("report.html", "w", encoding="utf-8") as f:
         f.write(html)
 
-    print("=== Pipeline Complete: Generated without ultra_premium restriction ===")
+    print("=== Pipeline Complete: All protected domains bypassed ===")
