@@ -2,8 +2,8 @@ name: Multi-Platform Review Report Generator
 
 on:
   schedule:
-    - cron: '0 2 * * *'  # Har roz subah background mein live run hoga
-  workflow_dispatch:      # Manual run button
+    - cron: '0 2 * * *'  # Har roz subah live run hoga
+  workflow_dispatch:      # Manual trigger
 
 permissions:
   contents: write
@@ -27,6 +27,8 @@ jobs:
       - name: Run Master Scraper Engine
         env:
           SCRAPER_API_KEY: "20bda77b6873229d657469b817a75238"
+          GLASSDOOR_COOKIE: ${{ secrets.GLASSDOOR_COOKIE }}
+          INDEED_COOKIE: ${{ secrets.INDEED_COOKIE }}
         run: python scraper.py
 
       - name: Auto Commit Dashboard & Data
@@ -34,5 +36,5 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add index.html report.html *.csv
-          git commit -m "Live Multi-Platform Scrape Update [skip ci]" || echo "No changes to commit"
+          git commit -m "Authenticated Live Reviews Update [skip ci]" || echo "No changes to commit"
           git push
