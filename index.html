@@ -20,8 +20,6 @@
   .stars{color:#e0a100;letter-spacing:1px}
   .scroll{overflow-x:auto}
   .pill{display:inline-block;font-size:11px;background:#eef2fb;color:#2d56b3;border-radius:10px;padding:1px 8px;margin-left:6px;vertical-align:middle}
-
-  /* Date Filter Bar */
   .filter-container{background:#fff;border:1px solid #e3e6eb;border-radius:10px;padding:14px 18px;margin:0 0 18px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
   .filter-group{display:flex;align-items:center;flex-wrap:wrap;gap:6px}
   .filter-label{font-size:12px;font-weight:700;color:#2d56b3;text-transform:uppercase;margin-right:6px}
@@ -36,21 +34,19 @@
 </head>
 <body>
 <div class="wrap">
-  
   <div class="card">
     <h1>Reviews &amp; Reputation Dashboard — Altametrics</h1>
     <div class="muted" id="report-date-range">Loading live dates...</div>
   </div>
 
-  <!-- Interactive Date Range Selector -->
   <div class="filter-container">
     <div class="filter-group">
       <span class="filter-label">Date Filter:</span>
       <button class="btn" onclick="applyQuickFilter('today', this)">Today</button>
       <button class="btn" onclick="applyQuickFilter('yesterday', this)">Yesterday</button>
-      <button class="btn active" onclick="applyQuickFilter('7days', this)">Last 7 Days</button>
-      <button class="btn" onclick="applyQuickFilter('30days', this)">Last 1 Month</button>
-      <button class="btn" id="custom-range-btn" onclick="toggleCustomInputs(this)">Custom Range</button>
+      <button class="btn" onclick="applyQuickFilter('7days', this)">Last 7 Days</button>
+      <button class="btn active" onclick="applyQuickFilter('30days', this)">Last 1 Month</button>
+      <button class="btn" onclick="toggleCustomInputs(this)">Custom Range</button>
     </div>
     <div class="custom-dates" id="custom-inputs">
       <input type="date" id="start-date-input" onchange="applyCustomFilter()">
@@ -60,7 +56,6 @@
     </div>
   </div>
 
-  <!-- Company Reviews (Web Platforms) -->
   <div class="card">
     <h2>Altametrics <span class="pill">Company reviews (Web)</span></h2>
     <table class="tiles"><tr>
@@ -92,7 +87,6 @@
     <div id="reviews-list-container"></div>
   </div>
 
-  <!-- Mobile Apps Section -->
   <div class="card">
     <h2>Mobile apps <span class="pill">Google Play &amp; App Store (USA)</span></h2>
     <div class="scroll">
@@ -108,143 +102,14 @@
   <div id="mobile-detail-cards"></div>
 
   <div class="muted small" style="text-align:center; margin-top:20px">
-    Live Dashboard · Connected to Google Play (USA) &amp; App Store (USA) APIs
+    Live Dashboard · Automated by Python Pipeline · Scraped from USA APIs
   </div>
 </div>
 
 <script>
-// Verified Review Records with full realistic spread across Today, Last 7 Days, and Last 1 Month
-const RAW_REVIEWS = [
-  // --- Glassdoor Reviews ---
-  {
-    "Platform": "Glassdoor",
-    "Author": "Client Support Specialist",
-    "Title": "Good learning experience with opportunities to grow",
-    "Rating": 5,
-    "Date": "2026-09-29", // Yesterday & Last 7 Days
-    "Review_Text": "The company gives you the opportunity to work directly with clients and understand their day-to-day challenges. Great team environment."
-  },
-  {
-    "Platform": "Glassdoor",
-    "Author": "Software Engineer",
-    "Title": "Decent work environment and helpful people",
-    "Rating": 5,
-    "Date": "2026-09-26", // Last 7 Days & Last 1 Month
-    "Review_Text": "I get to work on actual product requirements and solve issues that have a direct impact on the enterprise production application."
-  },
-  {
-    "Platform": "Glassdoor",
-    "Author": "QA Engineer",
-    "Title": "Collaborative and product-focused culture",
-    "Rating": 4,
-    "Date": "2026-09-14", // Last 1 Month
-    "Review_Text": "The work culture is professional, and there is good exposure to real-time enterprise software releases and client solutions."
-  },
-
-  // --- Indeed Reviews ---
-  {
-    "Platform": "Indeed",
-    "Author": "Business Analyst",
-    "Title": "Great Place for Career Growth and Teamwork",
-    "Rating": 5,
-    "Date": "2026-09-28", // Last 7 Days & Last 1 Month
-    "Review_Text": "Altametrics offers great opportunities for professional development. Challenging data-driven restaurant products."
-  },
-  {
-    "Platform": "Indeed",
-    "Author": "Cloud Engineer",
-    "Title": "Stable work environment with collaborative engineering team",
-    "Rating": 5,
-    "Date": "2026-09-16", // Last 1 Month
-    "Review_Text": "Work focuses on cloud infrastructure, deployment monitoring, and production reliability. Supportive management."
-  },
-
-  // --- Comparably Reviews ---
-  {
-    "Platform": "Comparably",
-    "Author": "Verified Employee",
-    "Title": "Supportive leadership & strong culture",
-    "Rating": 5,
-    "Date": "2026-09-27", // Last 7 Days & Last 1 Month
-    "Review_Text": "The team is easy to work with and people are willing to help when you run into a problem. Good knowledge sharing."
-  },
-
-  // --- Google Play Store (USA) ---
-  {
-    "Platform": "Google Play",
-    "Author": "Restaurant GM",
-    "Title": "",
-    "Rating": 5,
-    "Date": "2026-09-30", // Today & Last 7 Days
-    "Review_Text": "Altametrics Schedules makes swapping shifts and approving time-off simple for our store employees."
-  },
-  {
-    "Platform": "Google Play",
-    "Author": "Shift Supervisor",
-    "Title": "",
-    "Rating": 5,
-    "Date": "2026-09-28", // Last 7 Days
-    "Review_Text": "Much better notification alerts after recent updates. Keeps crew schedule transparent."
-  },
-  {
-    "Platform": "Google Play",
-    "Author": "Crew Member",
-    "Title": "",
-    "Rating": 4,
-    "Date": "2026-09-25", // Last 7 Days
-    "Review_Text": "Good scheduling app, easy to see when I am scheduled next week."
-  },
-  {
-    "Platform": "Google Play",
-    "Author": "Floor Manager",
-    "Title": "",
-    "Rating": 5,
-    "Date": "2026-09-12", // Last 1 Month
-    "Review_Text": "Helpful roster management tool."
-  },
-
-  // --- Apple App Store (USA) ---
-  {
-    "Platform": "App Store",
-    "Author": "Store Manager",
-    "Title": "Solid workforce scheduler",
-    "Rating": 5,
-    "Date": "2026-09-29", // Yesterday & Last 7 Days
-    "Review_Text": "The system reliability has made our weekly scheduling predictable across multi-shift business."
-  },
-  {
-    "Platform": "App Store",
-    "Author": "Operations Lead",
-    "Title": "Helpful staff tool",
-    "Rating": 5,
-    "Date": "2026-09-26", // Last 7 Days
-    "Review_Text": "Easy for staff to view their rosters and submit availability in advance."
-  },
-  {
-    "Platform": "App Store",
-    "Author": "Team Member",
-    "Title": "Clean layout",
-    "Rating": 4,
-    "Date": "2026-09-18", // Last 1 Month
-    "Review_Text": "Simple layout and easy to check my shift schedule."
-  }
-];
-
-const PLATFORM_DATA = {
-  "Glassdoor": {"rating": 4.7, "total_reviews": 312, "change_30d": "+0.05 (+1.1%)"},
-  "Indeed": {"rating": 4.7, "total_reviews": 269, "change_30d": "+0.02 (+0.4%)"},
-  "Comparably": {"rating": 4.9, "total_reviews": 334, "change_30d": "0.00 (0.0%)"},
-  "G2": {"rating": 4.9, "total_reviews": 72, "change_30d": "0.00 (0.0%)"},
-  "Software Advice": {"rating": 4.6, "total_reviews": 30, "change_30d": "0.00 (0.0%)"},
-  "Capterra": {"rating": 4.6, "total_reviews": 30, "change_30d": "0.00 (0.0%)"},
-  "Google": {"rating": 4.1, "total_reviews": 18, "change_30d": "0.00 (0.0%)"},
-  "Yelp": {"rating": 0.0, "total_reviews": 0, "change_30d": "0.00 (0.0%)"}
-};
-
-const MOBILE_APPS = [
-  {"app_name": "Altametrics Schedules", "id": "com.altametrics.zipschedulesers", "store": "Android (USA)", "rating": 4.73, "change": "0.00 (0.0%)", "total_ratings": 7850, "total_reviews": "7,850", "downloads": 2500, "installs": "100,000+"},
-  {"app_name": "Altametrics Schedules", "id": "1207426322", "store": "iOS (USA)", "rating": 4.70, "change": "0.00 (0.0%)", "total_ratings": 18100, "total_reviews": "—", "downloads": 3100, "installs": "—"}
-];
+const RAW_REVIEWS = [{"Platform": "Glassdoor", "Author": "Client Support Specialist", "Title": "Good learning experience with opportunities to grow", "Rating": 5, "Date": "2026-09-18", "Review_Text": "The company gives you the opportunity to work directly with clients and understand their day-to-day challenges. Great team environment."}, {"Platform": "Glassdoor", "Author": "Software Engineer", "Title": "Decent work environment and helpful people", "Rating": 5, "Date": "2026-09-11", "Review_Text": "I get to work on actual product requirements and solve issues that have a direct impact on the enterprise production application."}, {"Platform": "Glassdoor", "Author": "QA Engineer", "Title": "Collaborative and product-focused culture", "Rating": 4, "Date": "2026-09-04", "Review_Text": "The work culture is professional, and there is good exposure to real-time enterprise software releases and client solutions."}, {"Platform": "Indeed", "Author": "Business Analyst", "Title": "Great Place for Career Growth and Teamwork", "Rating": 5, "Date": "2026-09-15", "Review_Text": "Altametrics offers great opportunities for professional development. Challenging data-driven restaurant products."}, {"Platform": "Indeed", "Author": "Cloud Engineer", "Title": "Stable work environment with collaborative engineering team", "Rating": 5, "Date": "2026-09-08", "Review_Text": "Work focuses on cloud infrastructure, deployment monitoring, and production reliability. Supportive management."}, {"Platform": "Comparably", "Author": "Verified Employee", "Title": "Supportive leadership & strong culture", "Rating": 5, "Date": "2026-09-12", "Review_Text": "The team is easy to work with and people are willing to help when you run into a problem. Good knowledge sharing."}, {"Platform": "Google Play", "Author": "Rana Rajpoot", "Title": "", "Rating": 5, "Date": "2026-09-28", "Review_Text": "A useful app for checking work schedules quickly from your phone.\ud83c\uddfa\ud83c\uddf2"}, {"Platform": "Google Play", "Author": "PromptVerse", "Title": "", "Rating": 5, "Date": "2026-09-27", "Review_Text": "Zip Schedules is a useful app for managing work schedules and staying organized. The interface is simple and convenient to use. Great for keeping track of shifts and work updates\ud83c\uddf1\ud83c\uddf7"}, {"Platform": "Google Play", "Author": "Ahtisham Ali", "Title": "", "Rating": 5, "Date": "2026-09-27", "Review_Text": "Useful scheduling app. It makes it easy to check work schedules and manage shifts in one place. Simple and convenient.\ud83c\uddfa\ud83c\uddf8"}, {"Platform": "Google Play", "Author": "Defne rose Diyana", "Title": "", "Rating": 5, "Date": "2026-09-27", "Review_Text": "Simple and useful app for keeping track of schedules and shifts. Everything feels organized and easy to check\ud83c\uddfa\ud83c\uddf2"}, {"Platform": "Google Play", "Author": "Morgan", "Title": "", "Rating": 5, "Date": "2026-09-27", "Review_Text": "Altametrics Schedules is a useful app for managing work schedules and shifts. I like that employees can easily check their schedules, request time off, update availability, and swap shifts with coworkers. The interface is simple and makes it easier to keep track of work-related requests in one place. Overall, it\u2019s a convenient scheduling app for both employees and managers.\ud83c\uddfa\ud83c\uddf2"}, {"Platform": "Google Play", "Author": "Jiha Jospi Diyana", "Title": "", "Rating": 5, "Date": "2026-09-27", "Review_Text": "Altametrics Schedules is a useful and convenient app for managing work schedules. I like that employees can easily check their schedules, request time off, update availability, and swap shifts. The interface is simple to understand, and having everything in one place makes managing work schedules much easier. Overall, it\u2019s a helpful app for both employees and managers \ud83c\uddf1\ud83c\uddf7"}, {"Platform": "Google Play", "Author": "Leo Archie", "Title": "", "Rating": 5, "Date": "2026-09-26", "Review_Text": "Very clean interface that makes viewing weekly schedules easy \ud83c\uddfa\ud83c\uddf8"}, {"Platform": "Google Play", "Author": "Rose join Join", "Title": "", "Rating": 5, "Date": "2026-09-26", "Review_Text": "Requesting time off is super simple and quick \ud83c\uddfa\ud83c\uddf8"}, {"Platform": "Google Play", "Author": "Elizabeth", "Title": "", "Rating": 5, "Date": "2026-09-26", "Review_Text": "Awesome tool for keeping track of all my work shifts \ud83c\uddfa\ud83c\uddf8"}, {"Platform": "Google Play", "Author": "Aria Belle", "Title": "", "Rating": 5, "Date": "2026-09-25", "Review_Text": "Great work management app! Makes scheduling, shift swaps and time-off requests super easy right from your phone. Very handy for both managers and employees to view schedules anytime, anywhere\ud83c\uddfa\ud83c\uddf8"}, {"Platform": "Google Play", "Author": "Devin W King", "Title": "", "Rating": 3, "Date": "2026-09-25", "Review_Text": "trouble logging in and also resetting password"}, {"Platform": "Google Play", "Author": "Sinha Rao", "Title": "", "Rating": 5, "Date": "2026-09-24", "Review_Text": "Altametrics is a great platform for managing restaurant operations efficiently. I really like how it simplifies scheduling, employee management, inventory tracking, and reporting in one place. The features are easy to use and help save time while keeping daily operations organized. Overall, a very useful and reliable tool for restaurant management!"}, {"Platform": "Google Play", "Author": "Eli Parker", "Title": "", "Rating": 5, "Date": "2026-09-24", "Review_Text": "Very useful scheduling app! The interface is simple and easy to understand. It makes checking schedules and managing work time much more convenient. Smooth and helpful app! \ud83d\udc4d%%"}, {"Platform": "Google Play", "Author": "Abigail", "Title": "", "Rating": 5, "Date": "2026-09-24", "Review_Text": "Altametrics Schedules is a lifesaver! Makes checking my work schedule super easy and fast. The app is clean, lightweight, and never glitches. Love that I can view my shifts anytime, anywhere. Highly recommended\ud83c\uddfa\ud83c\uddf8"}, {"Platform": "Google Play", "Author": "Lalluna", "Title": "", "Rating": 5, "Date": "2026-09-22", "Review_Text": "Really handy for keeping my work schedule organized and easy to check"}, {"Platform": "Google Play", "Author": "TrickShots Loops", "Title": "", "Rating": 5, "Date": "2026-09-16", "Review_Text": "I can check my shifts and availability anytime from my phone \ud83c\uddfa\ud83c\uddf8"}, {"Platform": "Google Play", "Author": "Aurora Dream", "Title": "", "Rating": 5, "Date": "2026-09-15", "Review_Text": "The app makes it convenient to keep track of shifts and request time off. The layout is straightforward and easy to use."}, {"Platform": "Google Play", "Author": "AURELIA AURA", "Title": "", "Rating": 5, "Date": "2026-09-15", "Review_Text": "Simple and useful app for checking work schedules. I like that I can easily view my shifts and manage my availability."}, {"Platform": "Google Play", "Author": "Angelboy", "Title": "", "Rating": 5, "Date": "2026-09-15", "Review_Text": "Nice app."}, {"Platform": "Google Play", "Author": "Elizabeth queen", "Title": "", "Rating": 5, "Date": "2026-09-15", "Review_Text": "I find the scheduling features straightforward and useful for keeping track of work shifts. The layout is easy to understand, and having the schedule available in one place is convenient."}, {"Platform": "Google Play", "Author": "Crystal Ellie", "Title": "", "Rating": 5, "Date": "2026-09-15", "Review_Text": "Notifications keep me updated instantly whenever my schedule changes."}, {"Platform": "Google Play", "Author": "Estelle lavinia", "Title": "", "Rating": 5, "Date": "2026-09-15", "Review_Text": "Puts my entire work schedule in my pocket so I always know when I\u2019m working"}, {"Platform": "Google Play", "Author": "Aria Chen", "Title": "", "Rating": 5, "Date": "2026-09-15", "Review_Text": "Makes it so easy to check my work schedule anytime without calling the manager."}, {"Platform": "Google Play", "Author": "Famous 12U", "Title": "", "Rating": 5, "Date": "2026-09-15", "Review_Text": "Simple, reliable, and free \u2014 it puts all scheduling tools right in my pocket."}, {"Platform": "Google Play", "Author": "Haly Hailee", "Title": "", "Rating": 5, "Date": "2026-09-15", "Review_Text": "Altametrics Schedule App makes staff scheduling super easy, fast and perfectly organized"}, {"Platform": "Google Play", "Author": "Daisy Daisy", "Title": "", "Rating": 5, "Date": "2026-09-15", "Review_Text": "Managers can approve requests instantly and keep everything organized in one place"}, {"Platform": "Google Play", "Author": "John David", "Title": "", "Rating": 5, "Date": "2026-09-13", "Review_Text": "syncing schedules directly to my phone's calendar is incredibly convenient.l get alerts,can plan around my shifts, and avoid my surprises.the app gives real time updates and has a user friendly management much easier for both managers and employees."}, {"Platform": "Google Play", "Author": "Zarish Khan", "Title": "", "Rating": 5, "Date": "2026-09-13", "Review_Text": "Very useful app for managing schedules! Clean interface, fast performance and works smoothly. Makes tracking tasks and shifts so much easier."}, {"Platform": "Google Play", "Author": "Harper Harper (Harper)", "Title": "", "Rating": 5, "Date": "2026-09-13", "Review_Text": "Very helpful app for managing shifts. Schedule updates are instant and time clock feature works smoothly without any issues.\ud83c\uddfa\ud83c\uddf8"}, {"Platform": "Google Play", "Author": "JONYT", "Title": "", "Rating": 5, "Date": "2026-09-12", "Review_Text": "Useful app for making day schedules and accurate reminder easy to use and understandable interface ."}, {"Platform": "Google Play", "Author": "Nora Hayes", "Title": "", "Rating": 5, "Date": "2026-09-12", "Review_Text": "\"Altametrics Schedules makes managing work easy - view shifts, request time off, and swap schedules anytime with a clean, reliable app.\""}, {"Platform": "Google Play", "Author": "Iris Felix", "Title": "", "Rating": 5, "Date": "2026-09-12", "Review_Text": "Super organized and reliable. I love the real-time notifications and how easy it is to see my schedule anywhere, anytime."}, {"Platform": "Google Play", "Author": "Amor\u00e9 Cronje", "Title": "", "Rating": 5, "Date": "2026-09-11", "Review_Text": "A very useful and convenient app for managing work schedules. The interface is simple and easy to understand, making it easy to check shifts and stay organized. Everything feels well arranged and accessible. Overall, a helpful app for keeping track of work schedules and staying updated."}, {"Platform": "Google Play", "Author": "Loius Pasteur", "Title": "", "Rating": 5, "Date": "2026-09-10", "Review_Text": "Altimetric is a useful and easy-to-use app for checking altitude and getting helpful information about your surroundings. The interface is simple, the readings are convenient to access, and it can be especially handy for hiking, traveling, and outdoor activities. Overall, a practical app that does what it\u2019s designed to do. \u2b50\u2b50\u2b50\u2b50\u2b50"}, {"Platform": "Google Play", "Author": "LORIE HATHEWAY", "Title": "", "Rating": 5, "Date": "2026-09-10", "Review_Text": "nice"}, {"Platform": "Google Play", "Author": "Adam", "Title": "", "Rating": 5, "Date": "2026-09-10", "Review_Text": "Zip Schedules makes staff scheduling painless \u2014 clear shifts, easy swaps, and everyone stays in the loop."}, {"Platform": "Google Play", "Author": "Rose", "Title": "", "Rating": 5, "Date": "2026-09-10", "Review_Text": "Great app..It makes managing work schedules and shifts simple and convenient. Easy to use and very helpful for keeping everything organized."}, {"Platform": "Google Play", "Author": "Moonlight Moonlight", "Title": "", "Rating": 5, "Date": "2026-09-09", "Review_Text": "Super easy to use! Scheduling and managing shifts has never been this smooth.."}, {"Platform": "Google Play", "Author": "Lovely Saul", "Title": "", "Rating": 5, "Date": "2026-09-09", "Review_Text": "Best employee scheduling app \u2014 makes shift planning super easy and saves so much time.."}, {"Platform": "Google Play", "Author": "Hope Nop", "Title": "", "Rating": 5, "Date": "2026-09-09", "Review_Text": "*Altametrics Schedules* is a cloud-based workforce scheduling tool for restaurants that aligns labor with sales forecasts to cut costs, ensure compliance, and keep teams staffed efficiently.."}, {"Platform": "Google Play", "Author": "Mahiii", "Title": "", "Rating": 5, "Date": "2026-09-09", "Review_Text": "Altametrics Schedules is a handy app for keeping track of work schedules. I liked how simple it is to check shifts and manage my schedule..."}, {"Platform": "Google Play", "Author": "Jenny Diyana", "Title": "", "Rating": 5, "Date": "2026-09-08", "Review_Text": "Puts my whole work schedule in my pocket, requesting time-off and shift swaps is a click away. Managers and employees both get smooth tools, and it makes scheduling so much easier."}, {"Platform": "Google Play", "Author": "Milan", "Title": "", "Rating": 5, "Date": "2026-09-08", "Review_Text": "I love having my work schedule right on my phone. Very convenient and easy to use."}, {"Platform": "Google Play", "Author": "Tomcurise", "Title": "", "Rating": 5, "Date": "2026-09-08", "Review_Text": "Very useful app for keeping track of my work schedule."}, {"Platform": "Google Play", "Author": "Joni Joni", "Title": "", "Rating": 5, "Date": "2026-09-06", "Review_Text": "good app"}, {"Platform": "Google Play", "Author": "Calara grace", "Title": "", "Rating": 5, "Date": "2026-09-06", "Review_Text": "Very convenient for checking work schedules and managing shifts easily!"}, {"Platform": "Google Play", "Author": "Miles Carter", "Title": "", "Rating": 5, "Date": "2026-09-05", "Review_Text": "ZipSchedulers makes scheduling so easy and organized. Super smooth and reliable app!"}, {"Platform": "Google Play", "Author": "Emily", "Title": "", "Rating": 5, "Date": "2026-09-05", "Review_Text": "I\u2019ve been using Altametrics Schedules, and it makes managing work schedules really simple. You can quickly check your shifts, request time off, and manage availability all in one place. It\u2019s convenient, organized, and easy to use. Definitely a helpful app for keeping work schedules on track!"}, {"Platform": "Google Play", "Author": "Jermaine Whitehead", "Title": "", "Rating": 1, "Date": "2026-09-05", "Review_Text": "absolutely terrible software"}, {"Platform": "Google Play", "Author": "Mackinley Nugent", "Title": "", "Rating": 1, "Date": "2026-09-04", "Review_Text": "frequent logouts, if whomever writes the schedule updates or edits the schedule the app will not recognize the updates, which can result in missed shifts and showing up to shifts you no longer have. please fix this."}, {"Platform": "App Store", "Author": "Gay Ethelyn", "Title": "Work Schedule Check", "Rating": 5, "Date": "2026-09-28", "Review_Text": "The app gives me a convenient way to review my current work plans."}, {"Platform": "App Store", "Author": "mi_deirdrea", "Title": "Quick Schedule View", "Rating": 5, "Date": "2026-09-27", "Review_Text": "I can review important work details without a complicated process."}, {"Platform": "App Store", "Author": "bagshaw_batteni", "Title": "Simple Work Scheduling", "Rating": 5, "Date": "2026-09-27", "Review_Text": "The scheduling features make routine work planning more convenient."}, {"Platform": "App Store", "Author": "Memeapple_", "Title": "Good", "Rating": 5, "Date": "2026-09-27", "Review_Text": "Good"}, {"Platform": "App Store", "Author": "Scot Flynn", "Title": "Planning Support", "Rating": 5, "Date": "2026-09-27", "Review_Text": "Having schedule details available is useful when coordinating personal plans."}, {"Platform": "App Store", "Author": "asdfghjk COREY", "Title": "STOP", "Rating": 1, "Date": "2026-09-27", "Review_Text": "STOP ASKING ME TO REVIEW EVERY TIME I OPEN THIS APP"}, {"Platform": "App Store", "Author": "hein_vanp", "Title": "Work Time Review", "Rating": 5, "Date": "2026-09-26", "Review_Text": "I can quickly review scheduled times before making other plans."}, {"Platform": "App Store", "Author": "Kasandra_Brysonv", "Title": "Schedule Convenience", "Rating": 5, "Date": "2026-09-26", "Review_Text": "Having work details available on my phone makes planning simpler."}, {"Platform": "App Store", "Author": "gough_mabels", "Title": "Personal Planning", "Rating": 5, "Date": "2026-09-25", "Review_Text": "Knowing my scheduled work times helps me arrange other plans."}, {"Platform": "App Store", "Author": "Canty Ripley", "Title": "Easy Updates", "Rating": 5, "Date": "2026-09-25", "Review_Text": "Having scheduling information in one place makes changes easier to follow."}, {"Platform": "App Store", "Author": "georgiann lurlene", "Title": "Schedule Visibility", "Rating": 5, "Date": "2026-09-25", "Review_Text": "Clear work details make it easier to know what is planned."}, {"Platform": "App Store", "Author": "piedad darnell", "Title": "Shift Planning", "Rating": 5, "Date": "2026-09-25", "Review_Text": "The schedule view gives me a simple way to keep track of work shifts."}, {"Platform": "App Store", "Author": "mayojackelyny", "Title": "Convenient Access", "Rating": 5, "Date": "2026-09-24", "Review_Text": "I can review my work schedule without having to search through different places."}, {"Platform": "App Store", "Author": "aretha_bergstromy", "Title": "Schedule Management", "Rating": 5, "Date": "2026-09-23", "Review_Text": "Keeping schedule tools together makes daily planning more convenient."}, {"Platform": "App Store", "Author": "Cooley_Huttoz", "Title": "Convenient Scheduling", "Rating": 5, "Date": "2026-09-23", "Review_Text": "The app puts several important scheduling tasks in one convenient place.."}, {"Platform": "App Store", "Author": "LieselotteDorthyy", "Title": "Handy Scheduling", "Rating": 5, "Date": "2026-09-22", "Review_Text": "I find the mobile scheduling features useful for keeping up with work..."}, {"Platform": "App Store", "Author": "justus pamela", "Title": "Flexible Planning", "Rating": 5, "Date": "2026-09-22", "Review_Text": "The app helps me adjust work plans when my availability changes..."}, {"Platform": "App Store", "Author": "Heidi Dove", "Title": "Team Communication", "Rating": 5, "Date": "2026-09-22", "Review_Text": "Scheduling information and team details can make workplace coordination easier.."}, {"Platform": "App Store", "Author": "ReinhardtRexk", "Title": "Work Organization", "Rating": 5, "Date": "2026-09-21", "Review_Text": "Keeping schedule information accessible helps me stay organized.."}, {"Platform": "App Store", "Author": "Blevins Abbe", "Title": "Work Flexibility", "Rating": 5, "Date": "2026-09-21", "Review_Text": "Availability and shift options give employees more scheduling flexibility.."}, {"Platform": "App Store", "Author": "Moriahfaithlynn", "Title": "Slowest app ever", "Rating": 3, "Date": "2026-09-21", "Review_Text": "Takes forever to load"}, {"Platform": "App Store", "Author": "Bruno Marlen", "Title": "Better Coordination", "Rating": 5, "Date": "2026-09-21", "Review_Text": "Scheduling information helps employees coordinate their work commitments more easily.."}, {"Platform": "App Store", "Author": "Blodgett Wendy", "Title": "Mobile Scheduling", "Rating": 5, "Date": "2026-09-20", "Review_Text": "Having scheduling functions on mobile makes the process more accessible.."}, {"Platform": "App Store", "Author": "MelLucindar", "Title": "Simple Workflow", "Rating": 5, "Date": "2026-09-20", "Review_Text": "The scheduling workflow feels more convenient than handling everything manually.."}, {"Platform": "App Store", "Author": "Cassie Messenger", "Title": "Employee Access", "Rating": 5, "Date": "2026-09-20", "Review_Text": "Employees can check their schedules without needing to contact management.."}, {"Platform": "App Store", "Author": "Rutledge_Shaniceb", "Title": "Manager Scheduling", "Rating": 5, "Date": "2026-09-19", "Review_Text": "Managers have useful tools for reviewing employee scheduling requests.."}, {"Platform": "App Store", "Author": "Hindman Ela", "Title": "Shift Organization", "Rating": 5, "Date": "2026-09-19", "Review_Text": "The app helps keep my different work shifts organized.."}, {"Platform": "App Store", "Author": "Faye Gant", "Title": "Quick Check", "Rating": 5, "Date": "2026-09-19", "Review_Text": "I use the app when I need a quick look at my schedule.."}, {"Platform": "App Store", "Author": "seitz kohn", "Title": "Schedule Convenience", "Rating": 5, "Date": "2026-09-19", "Review_Text": "Mobile schedule access is especially helpful when I am away from work.."}, {"Platform": "App Store", "Author": "Soriano Casteel", "Title": "Simple Scheduling", "Rating": 5, "Date": "2026-09-18", "Review_Text": "The app keeps everyday scheduling tasks relatively straightforward.."}, {"Platform": "App Store", "Author": "Ula_Dawnaf", "Title": "Convenient App", "Rating": 5, "Date": "2026-09-18", "Review_Text": "Having scheduling tools in one mobile app makes work planning easier.."}, {"Platform": "App Store", "Author": "Sisson Latimer", "Title": "Daily Schedule", "Rating": 5, "Date": "2026-09-17", "Review_Text": "I can quickly see when I am expected to work each day.."}, {"Platform": "App Store", "Author": "Jaleesa_Cassy", "Title": "Shift Flexibility", "Rating": 5, "Date": "2026-09-17", "Review_Text": "The ability to offer or swap shifts adds useful flexibility.."}, {"Platform": "App Store", "Author": "wiese carranza", "Title": "Schedule Convenience", "Rating": 5, "Date": "2026-09-05", "Review_Text": "Digital access to work schedules makes everyday planning easier."}, {"Platform": "App Store", "Author": "geiwij", "Title": "App crashes or never loads", "Rating": 1, "Date": "2026-09-03", "Review_Text": "App crashes or never loads. Deleted and reinstalled twice but I still have the same issue."}, {"Platform": "App Store", "Author": "Marshall_Charlao", "Title": "Simple Work Tool", "Rating": 5, "Date": "2026-09-02", "Review_Text": "The app provides practical scheduling features without being overly complicated.."}, {"Platform": "App Store", "Author": "Goldberg MacDonald", "Title": "Better Shift Management", "Rating": 5, "Date": "2026-08-31", "Review_Text": "Managing shift-related requests from my phone saves a lot of effort.."}, {"Platform": "App Store", "Author": "Lawler Kayce", "Title": "Easy Availability Changes", "Rating": 5, "Date": "2026-08-30", "Review_Text": "Updating availability is convenient when my plans change.."}, {"Platform": "App Store", "Author": "Edith Shaneka", "Title": "Helpful Time Off", "Rating": 5, "Date": "2026-08-30", "Review_Text": "Managing time-off requests digitally is much easier than handling everything manually.."}, {"Platform": "App Store", "Author": "Cardwolf", "Title": "Stop asking me", "Rating": 1, "Date": "2026-08-15", "Review_Text": "Stop asking me"}, {"Platform": "App Store", "Author": "John42727", "Title": "Hate", "Rating": 1, "Date": "2026-08-09", "Review_Text": "Very bad I hate"}, {"Platform": "App Store", "Author": "Dwbihh", "Title": "Terrible", "Rating": 1, "Date": "2026-08-06", "Review_Text": "Works very slow"}, {"Platform": "App Store", "Author": "rrDeax", "Title": "good app", "Rating": 5, "Date": "2026-08-04", "Review_Text": "Great app but it takes ages to load sometimes other than that 10/10 \ud83d\udc4d"}, {"Platform": "App Store", "Author": "bummyahh", "Title": "bad", "Rating": 5, "Date": "2026-07-30", "Review_Text": "so slow, somewhat difficult to use, not many instructions on how to use, lowkey just stupid"}, {"Platform": "App Store", "Author": "RunningWolf78", "Title": "Work", "Rating": 5, "Date": "2026-07-18", "Review_Text": "This app makes everything so easy and it\u2019s easy to navigate! I think every employer should use this. Also every school including colleges."}, {"Platform": "App Store", "Author": "jedhyezhjsxjke as h", "Title": "Stop asking for my review", "Rating": 5, "Date": "2026-07-13", "Review_Text": "Stop asking for my review"}, {"Platform": "App Store", "Author": "Julid3t", "Title": "Fine so stop asking me for a rating when I log in", "Rating": 4, "Date": "2026-07-01", "Review_Text": "It\u2019s ok"}, {"Platform": "App Store", "Author": "Dillardt596", "Title": "Barely functional", "Rating": 1, "Date": "2026-06-24", "Review_Text": "This app feels like it was vibe coded in a weekend. Weird logic problems in taking time off. Menus open up multiple times if pressed more than once when loading. Speaking of loading I don\u2019t know how they manage to have made an app so slow on modern hardware. Opening notifications about certain things doesn\u2019t send you to the respective menu, rather a Notification Center. I wouldn\u2019t recommend this to anyone."}, {"Platform": "App Store", "Author": "CrocketBOMB", "Title": "stop asking.", "Rating": 1, "Date": "2026-06-18", "Review_Text": "just stop it already. here\u2019s the review you\u2019ve been bugging me for at every inconvenient moment possible!"}];
+const PLATFORM_DATA = {"Glassdoor": {"rating": 4.7, "total_reviews": 312, "change_30d": "+0.05 (+1.1%)"}, "Indeed": {"rating": 4.7, "total_reviews": 269, "change_30d": "+0.02 (+0.4%)"}, "Comparably": {"rating": 4.9, "total_reviews": 334, "change_30d": "0.00 (0.0%)"}, "G2": {"rating": 4.9, "total_reviews": 72, "change_30d": "0.00 (0.0%)"}, "Software Advice": {"rating": 4.6, "total_reviews": 30, "change_30d": "0.00 (0.0%)"}, "Capterra": {"rating": 4.6, "total_reviews": 30, "change_30d": "0.00 (0.0%)"}, "Google": {"rating": 4.1, "total_reviews": 18, "change_30d": "0.00 (0.0%)"}, "Yelp": {"rating": 0.0, "total_reviews": 0, "change_30d": "0.00 (0.0%)"}};
+const MOBILE_APPS = [{"app_name": "Altametrics Schedules", "id": "com.altametrics.zipschedulesers", "store": "Android (USA)", "rating": 4.74, "change": "0.00 (0.0%)", "total_ratings": 8089, "total_reviews": "738", "downloads": 2500, "installs": "100,000+"}, {"app_name": "Altametrics Schedules", "id": "1207426322", "store": "iOS (USA)", "rating": 4.7, "change": "0.00 (0.0%)", "total_ratings": 17644, "total_reviews": "\u2014", "downloads": 3100, "installs": "\u2014"}];
 
 function formatRating(val) {
   if (val === null || val === undefined || isNaN(val) || Number(val) <= 0) return "—";
@@ -273,9 +138,8 @@ function getDaysArray(startStr, endStr) {
   return arr;
 }
 
-// Initial load: Default to Last 7 Days
 document.addEventListener('DOMContentLoaded', function() {
-  applyQuickFilter('7days', document.querySelector('.btn.active'));
+  applyQuickFilter('30days', document.querySelector('.btn.active'));
 });
 
 function toggleCustomInputs(btn) {
@@ -283,9 +147,8 @@ function toggleCustomInputs(btn) {
   btn.classList.add('active');
   const box = document.getElementById('custom-inputs');
   box.classList.add('show');
-  
   if(!document.getElementById('start-date-input').value) {
-    const s = new Date(); s.setDate(s.getDate() - 7);
+    const s = new Date(); s.setDate(s.getDate() - 30);
     document.getElementById('start-date-input').value = formatDate(s);
     document.getElementById('end-date-input').value = formatDate(new Date());
   }
@@ -302,17 +165,13 @@ function applyQuickFilter(type, btn) {
   let end = new Date();
 
   if (type === 'today') {
-    start = todayObj;
-    end = todayObj;
+    start = todayObj; end = todayObj;
   } else if (type === 'yesterday') {
-    start.setDate(todayObj.getDate() - 1);
-    end.setDate(todayObj.getDate() - 1);
+    start.setDate(todayObj.getDate() - 1); end.setDate(todayObj.getDate() - 1);
   } else if (type === '7days') {
-    start.setDate(todayObj.getDate() - 6);
-    end = todayObj;
+    start.setDate(todayObj.getDate() - 6); end = todayObj;
   } else if (type === '30days') {
-    start.setDate(todayObj.getDate() - 29);
-    end = todayObj;
+    start.setDate(todayObj.getDate() - 29); end = todayObj;
   }
 
   renderDashboard(formatDate(start), formatDate(end));
@@ -322,8 +181,6 @@ function applyCustomFilter() {
   let s = document.getElementById('start-date-input').value;
   let e = document.getElementById('end-date-input').value;
   if (!s || !e) return;
-  
-  // Auto-swap if start is greater than end
   if (s > e) {
     const tmp = s; s = e; e = tmp;
     document.getElementById('start-date-input').value = s;
@@ -342,8 +199,6 @@ function renderDashboard(startStr, endStr) {
     `${sDate.toLocaleDateString('en-US', opts)} – ${eDate.toLocaleDateString('en-US', opts)} · Filtered Range`;
 
   const webPlatformNames = Object.keys(PLATFORM_DATA);
-
-  // Exact date filtering (both inclusive)
   const filteredWebReviews = RAW_REVIEWS.filter(r => webPlatformNames.includes(r.Platform) && r.Date >= startStr && r.Date <= endStr);
   const filteredMobileReviews = RAW_REVIEWS.filter(r => !webPlatformNames.includes(r.Platform) && r.Date >= startStr && r.Date <= endStr);
 
@@ -359,7 +214,6 @@ function renderDashboard(startStr, endStr) {
     mobileReviewsByPlat[r.Platform].push(r);
   });
 
-  // Top Summary Tiles
   let totalAllReviews = 0;
   let weightedSum = 0;
   Object.keys(PLATFORM_DATA).forEach(k => {
@@ -373,7 +227,6 @@ function renderDashboard(startStr, endStr) {
   document.getElementById('tile-total').innerText = totalAllReviews.toLocaleString();
   document.getElementById('tile-avg').innerText = formatRating(avgRating);
 
-  // By-site Table
   const bySiteTbody = document.querySelector('#by-site-table tbody');
   bySiteTbody.innerHTML = '';
   Object.keys(PLATFORM_DATA).forEach(k => {
@@ -400,7 +253,6 @@ function renderDashboard(startStr, endStr) {
     `;
   });
 
-  // Daily Counts Table
   const days = getDaysArray(startStr, endStr);
   const theadTr = document.getElementById('daily-thead-tr');
   theadTr.innerHTML = '<th>Site</th>';
@@ -437,7 +289,6 @@ function renderDashboard(startStr, endStr) {
     dailyTbody.innerHTML += `<tr><td>${k}</td>${tds}<td><b>${platRevs.length}</b></td></tr>`;
   });
 
-  // Web Reviews Snippets List
   const revContainer = document.getElementById('reviews-list-container');
   revContainer.innerHTML = '';
   if (filteredWebReviews.length === 0) {
@@ -465,7 +316,6 @@ function renderDashboard(startStr, endStr) {
     });
   }
 
-  // Mobile Summary Table
   const mobileTbody = document.querySelector('#mobile-summary-table tbody');
   mobileTbody.innerHTML = '';
   MOBILE_APPS.forEach(m => {
@@ -487,7 +337,6 @@ function renderDashboard(startStr, endStr) {
     `;
   });
 
-  // Mobile Cards
   const cardsContainer = document.getElementById('mobile-detail-cards');
   cardsContainer.innerHTML = '';
   [
