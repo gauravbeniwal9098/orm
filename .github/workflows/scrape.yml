@@ -2,11 +2,11 @@ name: Multi-Platform Review Report Generator
 
 on:
   schedule:
-    - cron: '0 0 * * 5'  # Har Friday ko apne aap chalega
-  workflow_dispatch:      # Aap khud manually bhi chala sakte hain
+    - cron: '0 2 * * *'  # Har roz subah 7:30 AM IST par background mein apne aap chalega
+  workflow_dispatch:      # Manual 'Run workflow' button ke liye
 
 permissions:
-  contents: write
+  contents: write         # Bot ko files commit aur push karne ki poori permission
 
 jobs:
   scrape-all:
@@ -14,10 +14,10 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
@@ -27,10 +27,10 @@ jobs:
       - name: Run Multi-Platform Scraper & Generate HTML Report
         run: python scraper.py
 
-      - name: Save CSV and HTML Report to Repository
+      - name: Save CSV, index.html and report.html to Repository
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add *.csv report.html
-          git commit -m "Automated Weekly Reviews Report [skip ci]" || echo "No changes to commit"
+          git add index.html report.html *.csv
+          git commit -m "Automated Reviews & Dashboard Update [skip ci]" || echo "No changes to commit"
           git push
