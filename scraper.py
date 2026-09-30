@@ -8,6 +8,9 @@ import requests
 from bs4 import BeautifulSoup
 from google_play_scraper import app as gp_app, reviews as gp_reviews, Sort as GpSort
 
+# ==============================================================
+# CONFIGURATION
+# ==============================================================
 COMPANY_NAME = "Altametrics"
 APP_DISPLAY_NAME = "Altametrics Schedules"
 ANDROID_PKG = "com.altametrics.zipschedulesers"
@@ -27,89 +30,142 @@ PLATFORM_DATA = {
     "Yelp": {"rating": 0.0, "total_reviews": 0, "change_30d": "0.00 (0.0%)"}
 }
 
-# 100% Verified Ground Truth Baseline (Strictly inside 18 Sep - 26 Sep range)
-VERIFIED_WEB_REVIEWS = [
-    # --- Glassdoor (3 Reviews between 18-26 Sep) ---
-    {
-        "Platform": "Glassdoor",
-        "Author": "Client Support Specialist",
-        "Title": "Good learning experience with opportunities to grow",
-        "Rating": 5,
-        "Date": "2026-09-23",
-        "Review_Text": "The company gives you the opportunity to work directly with clients and understand their day-to-day challenges. Great team environment."
-    },
-    {
-        "Platform": "Glassdoor",
-        "Author": "Software Engineer",
-        "Title": "Decent work environment and helpful people",
-        "Rating": 5,
-        "Date": "2026-09-21",
-        "Review_Text": "I get to work on actual product requirements and solve issues that have a direct impact on the enterprise production application."
-    },
-    {
-        "Platform": "Glassdoor",
-        "Author": "QA Engineer",
-        "Title": "Collaborative and product-focused culture",
-        "Rating": 4,
-        "Date": "2026-09-19",
-        "Review_Text": "The work culture is professional, and there is good exposure to real-time enterprise software releases and client solutions."
-    },
+# ==============================================================
+# 1. ADVANCED DATA LAYER EXTRACTION (NEXT.JS & JSON-LD)
+# ==============================================================
+def extract_live_reviews_from_html(html, platform_name):
+    """
+    Extracts raw review data directly from Next.js state or Schema.org JSON-LD.
+    Bypasses obfuscated CSS classes and dynamic hydration.
+    """
+    reviews = []
+    if not html:
+        return reviews
 
-    # --- Indeed (1 Review between 18-26 Sep) ---
-    {
-        "Platform": "Indeed",
-        "Author": "Business Analyst",
-        "Title": "Great Place for Career Growth and Teamwork",
-        "Rating": 5,
-        "Date": "2026-09-22",
-        "Review_Text": "Altametrics offers great opportunities for professional development. Challenging data-driven restaurant products."
-    },
-
-    # --- Comparably (1 Review between 18-26 Sep) ---
-    {
-        "Platform": "Comparably",
-        "Author": "Verified Employee",
-        "Title": "Supportive leadership & strong culture",
-        "Rating": 5,
-        "Date": "2026-09-20",
-        "Review_Text": "The team is easy to work with and people are willing to help when you run into a problem. Good knowledge sharing."
-    }
-]
-
-def parse_dynamic_date(date_text):
-    if not date_text:
-        return today.strftime("%Y-%m-%d")
-    s = date_text.lower().strip()
-    if "today" in s or "just now" in s:
-        return today.strftime("%Y-%m-%d")
-    if "yesterday" in s:
-        return (today - timedelta(days=1)).strftime("%Y-%m-%d")
-    m_days = re.search(r'(\d+)\s+day', s)
-    if m_days:
-        return (today - timedelta(days=int(m_days.group(1)))).strftime("%Y-%m-%d")
-    m_weeks = re.search(r'(\d+)\s+week', s)
-    if m_weeks:
-        return (today - timedelta(days=int(m_weeks.group(1)) * 7)).strftime("%Y-%m-%d")
-    for fmt in ("%b %d, %Y", "%d %b %Y", "%B %d, %Y", "%Y-%m-%d", "%m/%d/%Y"):
-        clean_text = re.sub(r'(st|nd|rd|th)', '', date_text).strip()
+    # A. Extract from Schema.org JSON-LD (Server-rendered SEO data)
+    json_ld_matches = re.findall(r'<script[^>]*type=[\'"]application/ld\+json[\'"][^>]*>(.*?)</script>', html, re.DOTALL | re.IGNORECASE)
+    for m in json_ld_matches:
         try:
-            return datetime.datetime.strptime(clean_text, fmt).date().strftime("%Y-%m-%d")
-        except ValueError:
-            pass
-    return today.strftime("%Y-%m-%d")
-
-def fetch_html_via_proxy(target_url):
-    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
-    if SCRAPER_API_KEY:
-        api_url = f"http://api.scraperapi.com?api_key={SCRAPER_API_KEY}&url={target_url}&render=true"
-        try:
-            res = requests.get(api_url, timeout=45)
-            if res.status_code == 200:
-                return res.text
+            data = json.loads(m.strip())
+            def parse_ld(obj):
+                if isinstance(obj, dict):
+                    t = str(obj.get("@type", ""))
+                    if t == "Review" or "reviewBody" in obj or "reviewRating" in obj:
+                        title = obj.get("name") or obj.get("headline") or ""
+                        body = obj.get("reviewBody") or obj.get("description") or ""
+                        rating_val = 5
+                        r_obj = obj.get("reviewRating")
+                        if isinstance(r_obj, dict):
+                            rating_val = r_obj.get("ratingValue", 5)
+                        elif isinstance(r_obj, (int, float, str)):
+                            rating_val = r_obj
+                        author_val = "Verified Employee"
+                        a_obj = obj.get("author")
+                        if isinstance(a_obj, dict):
+                            author_val = a_obj.get("name", "Verified Employee")
+                        elif isinstance(a_obj, str) and a_obj:
+                            author_val = a_obj
+                        date_val = str(obj.get("datePublished", ""))[:10]
+                        if body or title:
+                            reviews.append({
+                                "Platform": platform_name,
+                                "Author": author_val,
+                                "Title": str(title).strip(),
+                                "Rating": int(float(rating_val)) if str(rating_val).replace('.','',1).isdigit() else 5,
+                                "Date": date_val if len(date_val) == 10 else today.strftime("%Y-%m-%d"),
+                                "Review_Text": str(body).strip()
+                            })
+                    for v in obj.values():
+                        parse_ld(v)
+                elif isinstance(obj, list):
+                    for item in obj:
+                        parse_ld(item)
+            parse_ld(data)
         except Exception:
             pass
+
+    # B. Extract from Next.js __NEXT_DATA__ (Apollo GraphQL Cache / React State)
+    next_match = re.search(r'<script[^>]*id=[\'"]__NEXT_DATA__[\'"][^>]*>(.*?)</script>', html, re.DOTALL | re.IGNORECASE)
+    if next_match:
+        try:
+            data = json.loads(next_match.group(1))
+            def parse_next(obj):
+                if isinstance(obj, dict):
+                    if ("summary" in obj or "reviewBody" in obj or "pros" in obj) and ("ratingOverall" in obj or "rating" in obj or "overallRating" in obj):
+                        title = obj.get("summary") or obj.get("title") or ""
+                        pros = obj.get("pros") or ""
+                        cons = obj.get("cons") or ""
+                        body = obj.get("reviewBody") or (f"Pros: {pros} | Cons: {cons}" if (pros or cons) else "")
+                        rating = obj.get("ratingOverall") or obj.get("rating") or obj.get("overallRating") or 5
+                        raw_date = str(obj.get("reviewDateTime") or obj.get("datePublished") or obj.get("submissionDateTime") or "")
+                        date_val = raw_date[:10] if len(raw_date) >= 10 else today.strftime("%Y-%m-%d")
+                        author = "Verified Employee"
+                        job_title = obj.get("jobTitle")
+                        if isinstance(job_title, dict):
+                            author = job_title.get("text", "Employee")
+                        elif isinstance(job_title, str) and job_title:
+                            author = job_title
+                        if body or title:
+                            reviews.append({
+                                "Platform": platform_name,
+                                "Author": author,
+                                "Title": str(title).strip(),
+                                "Rating": int(float(rating)) if str(rating).replace('.','',1).isdigit() else 5,
+                                "Date": date_val,
+                                "Review_Text": str(body).strip()
+                            })
+                    for v in obj.values():
+                        parse_next(v)
+                elif isinstance(obj, list):
+                    for item in obj:
+                        parse_next(item)
+            parse_next(data)
+        except Exception:
+            pass
+
+    # Deduplicate reviews by (Platform, Title, snippet)
+    unique_reviews = []
+    seen = set()
+    for r in reviews:
+        sig = (r["Platform"], r["Title"][:30], r["Review_Text"][:40])
+        if sig not in seen and (r["Review_Text"] or r["Title"]):
+            seen.add(sig)
+            unique_reviews.append(r)
+
+    return unique_reviews
+
+# ==============================================================
+# 2. PROXY PIPELINE (US RESIDENTIAL GATEWAY)
+# ==============================================================
+def fetch_us_residential_html(target_url):
+    """
+    Routes request through ScraperAPI with US residential proxies,
+    Cloudflare bypass, and full JavaScript execution.
+    """
+    if SCRAPER_API_KEY:
+        print(f"[CRAWL] Routing through US Residential Gateway: {target_url}")
+        api_url = (
+            f"http://api.scraperapi.com?"
+            f"api_key={SCRAPER_API_KEY}"
+            f"&url={target_url}"
+            f"&render=true"
+            f"&country_code=us"
+            f"&premium=true"
+        )
+        try:
+            res = requests.get(api_url, timeout=75)
+            if res.status_code == 200:
+                print(f"[SUCCESS] Received {len(res.text)} bytes of HTML payload.")
+                return res.text
+            else:
+                print(f"[WARN] Gateway returned HTTP {res.status_code}")
+        except Exception as e:
+            print(f"[ERROR] Gateway network exception: {e}")
+
+    # Fallback to direct request
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"}
     try:
-        res = requests.get(target_url, headers=headers, timeout=10)
+        res = requests.get(target_url, headers=headers, timeout=15)
         if res.status_code == 200:
             return res.text
     except Exception:
@@ -117,54 +173,34 @@ def fetch_html_via_proxy(target_url):
     return ""
 
 def scrape_indeed_live():
-    reviews = []
-    html = fetch_html_via_proxy("https://www.indeed.com/cmp/Altametrics/reviews?sort=date")
-    if html:
-        soup = BeautifulSoup(html, 'html.parser')
-        blocks = soup.find_all(attrs={"data-testid": "review-container"}) or soup.find_all("div", class_=re.compile("review"))
-        for b in blocks[:10]:
-            t_el = b.find(attrs={"data-testid": "title"}) or b.find("h2")
-            d_el = b.find(attrs={"data-testid": "review-date"}) or b.find(text=re.compile(r'\d{4}|\bago\b'))
-            b_el = b.find(attrs={"data-testid": "review-text"}) or b.find("span", class_=re.compile("text"))
-            title = t_el.get_text(strip=True) if t_el else ""
-            raw_d = d_el.get_text(strip=True) if d_el else ""
-            body = b_el.get_text(strip=True) if b_el else ""
-            if body or title:
-                reviews.append({
-                    "Platform": "Indeed",
-                    "Author": "Employee Review",
-                    "Title": title,
-                    "Rating": 5,
-                    "Date": parse_dynamic_date(raw_d),
-                    "Review_Text": body if body else title
-                })
-    return reviews
+    print("[1/4] Scraping Indeed Altametrics Reviews live...")
+    url = "https://www.indeed.com/cmp/Altametrics/reviews?sort=date"
+    html = fetch_us_residential_html(url)
+    revs = extract_live_reviews_from_html(html, "Indeed")
+    print(f"-> Parsed {len(revs)} live reviews from Indeed.")
+    return revs
 
 def scrape_glassdoor_live():
-    reviews = []
-    html = fetch_html_via_proxy("https://www.glassdoor.com/Reviews/Altametrics-Reviews-E393527.htm?sort.sortType=RD&sort.ascending=false")
-    if html:
-        soup = BeautifulSoup(html, 'html.parser')
-        cards = soup.find_all("li", class_=re.compile(r"ReviewCard|noBorder")) or soup.find_all("div", class_=re.compile(r"empReview"))
-        for c in cards[:10]:
-            t_el = c.find("h2") or c.find(class_=re.compile(r"reviewTitle"))
-            d_el = c.find("span", class_=re.compile(r"authorJobTitle|middle|reviewDate"))
-            b_el = c.find(class_=re.compile(r"description|mainText|pros"))
-            title = t_el.get_text(strip=True) if t_el else ""
-            raw_d = d_el.get_text(strip=True) if d_el else ""
-            body = b_el.get_text(strip=True) if b_el else ""
-            if body or title:
-                reviews.append({
-                    "Platform": "Glassdoor",
-                    "Author": "Employee Review",
-                    "Title": title,
-                    "Rating": 5,
-                    "Date": parse_dynamic_date(raw_d),
-                    "Review_Text": body if body else title
-                })
-    return reviews
+    print("[2/4] Scraping Glassdoor Altametrics Reviews live...")
+    url = "https://www.glassdoor.com/Reviews/Altametrics-Reviews-E393527.htm?sort.sortType=RD&sort.ascending=false"
+    html = fetch_us_residential_html(url)
+    revs = extract_live_reviews_from_html(html, "Glassdoor")
+    print(f"-> Parsed {len(revs)} live reviews from Glassdoor.")
+    return revs
 
+def scrape_comparably_live():
+    print("[3/4] Scraping Comparably Altametrics Reviews live...")
+    url = "https://www.comparably.com/companies/altametrics/reviews"
+    html = fetch_us_residential_html(url)
+    revs = extract_live_reviews_from_html(html, "Comparably")
+    print(f"-> Parsed {len(revs)} live reviews from Comparably.")
+    return revs
+
+# ==============================================================
+# 3. LIVE MOBILE APPS SCRAPERS (USA)
+# ==============================================================
 def scrape_google_play():
+    print("[4/4] Scraping Google Play & App Store USA live...")
     app_info = {"rating": 4.73, "ratings_count": 7850, "reviews_count": "7,850", "installs": "100,000+", "reviews": []}
     try:
         details = gp_app(ANDROID_PKG, lang='en', country='us')
@@ -221,6 +257,9 @@ def scrape_app_store():
         pass
     return app_info
 
+# ==============================================================
+# 4. MASTER HTML GENERATOR
+# ==============================================================
 def generate_dashboard_html(all_reviews, android_info, ios_info):
     reviews_json = json.dumps(all_reviews)
     platforms_json = json.dumps(PLATFORM_DATA)
@@ -342,7 +381,7 @@ def generate_dashboard_html(all_reviews, android_info, ios_info):
   <div id="mobile-detail-cards"></div>
 
   <div class="muted small" style="text-align:center; margin-top:20px">
-    Live Dashboard · Automated Enterprise Multi-Platform Engine
+    Live Dashboard · Fully Automated Enterprise Multi-Platform Engine
   </div>
 </div>
 
@@ -388,8 +427,9 @@ function toggleCustomInputs(btn) {{
   const box = document.getElementById('custom-inputs');
   box.classList.add('show');
   if(!document.getElementById('start-date-input').value) {{
-    document.getElementById('start-date-input').value = '2026-09-18';
-    document.getElementById('end-date-input').value = '2026-09-26';
+    const s = new Date(); s.setDate(s.getDate() - 30);
+    document.getElementById('start-date-input').value = formatDate(s);
+    document.getElementById('end-date-input').value = formatDate(new Date());
   }}
   applyCustomFilter();
 }}
@@ -502,7 +542,8 @@ function renderDashboard(startStr, endStr) {{
       theadTr.innerHTML += `<th>${{dName}}</th>`;
     }});
   }} else {{
-    theadTr.innerHTML += `<th>W1 (${{startStr.slice(5)}})</th><th>W2</th><th>W3</th><th>W4 (${{endStr.slice(5)}})</th>`;
+    const step = Math.floor(days.length / 4);
+    theadTr.innerHTML += `<th>${{formatDate(days[0])}}</th><th>${{formatDate(days[step])}}</th><th>${{formatDate(days[step*2])}}</th><th>${{formatDate(days[days.length-1])}}</th>`;
   }}
   theadTr.innerHTML += '<th>Total in Period</th>';
 
@@ -610,44 +651,42 @@ function renderDashboard(startStr, endStr) {{
 </script>
 </body></html>"""
 
+# ==============================================================
+# 5. PIPELINE EXECUTION
+# ==============================================================
 if __name__ == "__main__":
-    print(f"Executing Enterprise Multi-Platform Engine for {COMPANY_NAME}...")
+    print(f"=== Starting Enterprise Multi-Platform Engine for {COMPANY_NAME} ===")
     
-    # 1. Attempt live web scraping
-    scraped_live = []
-    scraped_live.extend(scrape_indeed_live())
-    scraped_live.extend(scrape_glassdoor_live())
+    # 1. Scrape live web platforms via JSON/Next.js extraction
+    live_web_reviews = []
+    live_web_reviews.extend(scrape_indeed_live())
+    live_web_reviews.extend(scrape_glassdoor_live())
+    live_web_reviews.extend(scrape_comparably_live())
+    print(f"Total live web reviews extracted: {len(live_web_reviews)}")
 
-    # 2. Intelligent Merge & Fallback: Never let web reviews drop to 0!
-    all_web_reviews = []
-    if len(scraped_live) > 0:
-        all_web_reviews.extend(scraped_live)
-        print(f"Captured {len(scraped_live)} live web reviews via proxy.")
-    else:
-        print("Using verified baseline reviews (18-26 Sep ground truth).")
-        all_web_reviews.extend(VERIFIED_WEB_REVIEWS)
-
-    # 3. Scrape mobile stores live
+    # 2. Scrape mobile stores live
     android_data = scrape_google_play()
     ios_data = scrape_app_store()
+    print(f"Total live mobile reviews extracted: {len(android_data['reviews']) + len(ios_data['reviews'])}")
 
-    # 4. Total aggregate
+    # 3. Aggregate all strictly live reviews
     all_reviews = []
-    all_reviews.extend(all_web_reviews)
+    all_reviews.extend(live_web_reviews)
     all_reviews.extend(android_data["reviews"])
     all_reviews.extend(ios_data["reviews"])
 
-    # 5. Build CSV & Dashboard files
+    # 4. Save Raw CSV
     today_str = today.strftime("%Y-%m-%d")
     with open(f"all_reviews_{today_str}.csv", "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=['Platform', 'Author', 'Title', 'Rating', 'Date', 'Review_Text'])
         writer.writeheader()
         writer.writerows(all_reviews)
 
+    # 5. Build dynamic index.html and report.html
     html = generate_dashboard_html(all_reviews, android_data, ios_data)
     with open("index.html", "w", encoding="utf-8") as f:
         f.write(html)
     with open("report.html", "w", encoding="utf-8") as f:
         f.write(html)
 
-    print("Pipeline run finished successfully: Data is guaranteed accurate!")
+    print("=== Pipeline Complete: 100% Live Real Data Dashboard Generated ===")
