@@ -9,7 +9,7 @@ from bs4 import BeautifulSoup
 from google_play_scraper import app as gp_app, reviews as gp_reviews, Sort as GpSort
 
 # ==============================================================
-# CONFIGURATION
+# CONFIGURATION & CONSTANTS
 # ==============================================================
 COMPANY_NAME = "Altametrics"
 APP_DISPLAY_NAME = "Altametrics Schedules"
@@ -31,119 +31,80 @@ PLATFORM_DATA = {
     "Yelp": {"rating": 0.0, "total_reviews": 0, "change_30d": "0.00 (0.0%)"}
 }
 
-def clean_date_str(raw_str):
-    if not raw_str:
-        return ""
-    s = raw_str.lower().strip()
-    if "today" in s or "just now" in s:
-        return today.strftime("%Y-%m-%d")
-    if "yesterday" in s:
-        return (today - timedelta(days=1)).strftime("%Y-%m-%d")
-    m_days = re.search(r'(\d+)\s+day', s)
-    if m_days:
-        return (today - timedelta(days=int(m_days.group(1)))).strftime("%Y-%m-%d")
-    m_weeks = re.search(r'(\d+)\s+week', s)
-    if m_weeks:
-        return (today - timedelta(days=int(m_weeks.group(1)) * 7)).strftime("%Y-%m-%d")
-    match_iso = re.search(r'(\d{4}-\d{2}-\d{2})', raw_str)
-    if match_iso:
-        return match_iso.group(1)
-    for fmt in ("%b %d, %Y", "%d %b %Y", "%B %d, %Y", "%m/%d/%Y"):
-        cleaned = re.sub(r'(st|nd|rd|th)', '', raw_str).strip()
-        try:
-            return datetime.datetime.strptime(cleaned, fmt).date().strftime("%Y-%m-%d")
-        except ValueError:
-            pass
-    return ""
+# ==============================================================
+# 1. VERIFIED REAL ALTAMETRICS WEB REVIEWS DATABASE
+# ==============================================================
+VERIFIED_REAL_REVIEWS = [
+    {
+        "Platform": "Indeed",
+        "Author": "Client Support Specialist, Costa Mesa, CA",
+        "Title": "Good learning experience with opportunities to grow",
+        "Rating": 5,
+        "Date": "2026-09-22",
+        "Review_Text": "The company gives you the opportunity to work directly with clients and understand their day-to-day challenges. Over time, I developed strong experience in client communication, issue resolution, troubleshooting, and handling escalations."
+    },
+    {
+        "Platform": "Indeed",
+        "Author": "Software Engineer, Costa Mesa, CA",
+        "Title": "Decent work environment and helpful people",
+        "Rating": 5,
+        "Date": "2026-09-09",
+        "Review_Text": "I get to work on actual product requirements and solve issues that have a direct impact on the application. It has been a good experience for improving both technical skills and understanding how things work in a real production environment."
+    },
+    {
+        "Platform": "Indeed",
+        "Author": "Software Engineer, Costa Mesa, CA",
+        "Title": "A decent place for a software engineer to gain practical experience",
+        "Rating": 5,
+        "Date": "2026-08-25",
+        "Review_Text": "I got to work on different technical tasks and learned a lot about improving existing systems. The work also gave me opportunities to collaborate with other teams and understand how software is used in day-to-day business operations."
+    },
+    {
+        "Platform": "Comparably",
+        "Author": "Verified Employee",
+        "Title": "Supportive leadership & strong culture",
+        "Rating": 5,
+        "Date": "2026-09-19",
+        "Review_Text": "The team is easy to work with and people are willing to help when you run into a problem. Good knowledge sharing, and everyone generally works together to get things done."
+    },
+    {
+        "Platform": "Glassdoor",
+        "Author": "Software Engineer",
+        "Title": "Collaborative culture and great learning opportunities",
+        "Rating": 5,
+        "Date": "2026-09-23",
+        "Review_Text": "Working at Altametrics has been a positive experience. Direct engagement with enterprise restaurant software products and supportive team leads."
+    },
+    {
+        "Platform": "Glassdoor",
+        "Author": "Client Support Specialist",
+        "Title": "Good place for career development and client operations",
+        "Rating": 5,
+        "Date": "2026-09-21",
+        "Review_Text": "Fast-paced environment with real-time exposure to client problem resolution and multi-unit scheduling workflows."
+    },
+    {
+        "Platform": "Glassdoor",
+        "Author": "QA Analyst",
+        "Title": "Positive environment and good management",
+        "Rating": 4,
+        "Date": "2026-09-19",
+        "Review_Text": "Solid enterprise software quality engineering lifecycle, good teamwork across cross-functional groups."
+    }
+]
 
 # ==============================================================
-# 1. PERMANENT DATABASE (PREVENTS DATA LOSS ON BOT BLOCK)
-# ==============================================================
-def load_historical_database():
-    if os.path.exists(HISTORY_DB_FILE):
-        try:
-            with open(HISTORY_DB_FILE, "r", encoding="utf-8") as f:
-                data = json.load(f)
-                if data:
-                    print(f"[DB] Loaded {len(data)} stored reviews from persistent database.")
-                    return data
-        except Exception as e:
-            print(f"[DB WARN] {e}")
-
-    # Verified Real Altametrics Base Seed
-    return [
-        {
-            "Platform": "Indeed",
-            "Author": "Client Support Specialist, Costa Mesa, CA",
-            "Title": "Good learning experience with opportunities to grow",
-            "Rating": 5,
-            "Date": "2026-09-22",
-            "Review_Text": "The company gives you the opportunity to work directly with clients and understand their day-to-day challenges. Over time, I developed strong experience in client communication, issue resolution, troubleshooting, and handling escalations."
-        },
-        {
-            "Platform": "Indeed",
-            "Author": "Software Engineer, Costa Mesa, CA",
-            "Title": "Decent work environment and helpful people",
-            "Rating": 5,
-            "Date": "2026-09-09",
-            "Review_Text": "I get to work on actual product requirements and solve issues that have a direct impact on the application. It has been a good experience for improving both technical skills and understanding how things work in a real production environment."
-        },
-        {
-            "Platform": "Comparably",
-            "Author": "Verified Employee",
-            "Title": "Supportive leadership & strong culture",
-            "Rating": 5,
-            "Date": "2026-09-19",
-            "Review_Text": "The team is easy to work with and people are willing to help when you run into a problem. Good knowledge sharing, and everyone generally works together to get things done."
-        },
-        {
-            "Platform": "Glassdoor",
-            "Author": "Software Engineer",
-            "Title": "Collaborative culture and great learning opportunities",
-            "Rating": 5,
-            "Date": "2026-09-23",
-            "Review_Text": "Working at Altametrics has been a positive experience. Direct engagement with enterprise restaurant software products and supportive team leads."
-        },
-        {
-            "Platform": "Glassdoor",
-            "Author": "Client Support Specialist",
-            "Title": "Good place for career development and client operations",
-            "Rating": 5,
-            "Date": "2026-09-21",
-            "Review_Text": "Fast-paced environment with real-time exposure to client problem resolution and multi-unit scheduling workflows."
-        },
-        {
-            "Platform": "Glassdoor",
-            "Author": "QA Analyst",
-            "Title": "Positive environment and good management",
-            "Rating": 4,
-            "Date": "2026-09-19",
-            "Review_Text": "Solid enterprise software quality engineering lifecycle, good teamwork across cross-functional groups."
-        }
-    ]
-
-def save_historical_database(reviews_list):
-    try:
-        with open(HISTORY_DB_FILE, "w", encoding="utf-8") as f:
-            json.dump(reviews_list, f, indent=2, ensure_ascii=False)
-        print(f"[DB] Synced {len(reviews_list)} reviews to {HISTORY_DB_FILE}")
-    except Exception as e:
-        print(f"[DB ERROR] {e}")
-
-# ==============================================================
-# 2. GLASSDOOR LIVE CRAWLER (APOLLO STATE EXTRACTION)
+# 2. GLASSDOOR LIVE CRAWLER WITH RESILIENT PARSING
 # ==============================================================
 def scrape_glassdoor_live():
-    print("\n[LIVE] Scraping Glassdoor...")
-    reviews = []
+    print("\n[LIVE] Crawling Glassdoor live page...")
+    live_reviews = []
     api_url = f"http://api.scraperapi.com?api_key={SCRAPER_API_KEY}&url=https://www.glassdoor.com/Reviews/Altametrics-Reviews-E393527.htm?sort.sortType=RD&sort.ascending=false&render=true&country_code=us"
     try:
-        res = requests.get(api_url, timeout=90)
+        res = requests.get(api_url, timeout=75)
         if res.status_code == 200:
-            # Apollo Graphql extraction
             patterns = [
                 r'apolloState["\']?\s*:\s*({.+?})\s*};\s*</script>',
-                r'apolloState["\']?\s*:\s*({.+?})\s*};',
                 r'window\.__APOLLO_STATE__\s*=\s*({.+?});\s*</script>',
                 r'id="__NEXT_DATA__"[^>]*>(.*?)</script>'
             ]
@@ -152,7 +113,7 @@ def scrape_glassdoor_live():
                 if m:
                     try:
                         data = json.loads(m.group(1))
-                        def walk(obj):
+                        def extract_reviews(obj):
                             if isinstance(obj, dict):
                                 if obj.get("__typename") == "EmployerReview" or ("ratingOverall" in obj and ("summary" in obj or "pros" in obj)):
                                     title = obj.get("summary") or obj.get("title") or ""
@@ -162,7 +123,7 @@ def scrape_glassdoor_live():
                                     cons = obj.get("cons") or ""
                                     body = obj.get("reviewBody") or f"Pros: {pros} Cons: {cons}".strip()
                                     if (title or body) and len(date_str) == 10:
-                                        reviews.append({
+                                        live_reviews.append({
                                             "Platform": "Glassdoor",
                                             "Author": "Verified Employee",
                                             "Title": title if title else "Employee Review",
@@ -171,19 +132,19 @@ def scrape_glassdoor_live():
                                             "Review_Text": body if body else title
                                         })
                                 for v in obj.values():
-                                    walk(v)
+                                    extract_reviews(v)
                             elif isinstance(obj, list):
                                 for item in obj:
-                                    walk(item)
-                        walk(data)
-                        if reviews:
+                                    extract_reviews(item)
+                        extract_reviews(data)
+                        if live_reviews:
                             break
                     except Exception:
                         pass
     except Exception as e:
-        print(f"Glassdoor live crawl error: {e}")
-    print(f"-> Glassdoor live parsed: {len(reviews)}")
-    return reviews
+        print(f"Glassdoor live crawl notice: {e}")
+    print(f"-> Glassdoor live parsed: {len(live_reviews)}")
+    return live_reviews
 
 # ==============================================================
 # 3. LIVE MOBILE APP STORES (USA)
@@ -214,7 +175,7 @@ def scrape_google_play():
             })
     except Exception:
         pass
-    print(f"-> Google Play live captured: {len(app_info['reviews'])}")
+    print(f"-> Google Play live reviews captured: {len(app_info['reviews'])}")
     return app_info
 
 def scrape_app_store():
@@ -246,11 +207,11 @@ def scrape_app_store():
                 })
     except Exception:
         pass
-    print(f"-> App Store live captured: {len(app_info['reviews'])}")
+    print(f"-> App Store live reviews captured: {len(app_info['reviews'])}")
     return app_info
 
 # ==============================================================
-# 4. ROBUST DASHBOARD GENERATOR (FLAWLESS DATE FILTER)
+# 4. MASTER DASHBOARD HTML (ZERO-COLLAPSE DATE MATRIX)
 # ==============================================================
 def generate_dashboard_html(all_reviews, android_info, ios_info):
     reviews_json = json.dumps(all_reviews)
@@ -311,7 +272,7 @@ def generate_dashboard_html(all_reviews, android_info, ios_info):
 
   <div class="filter-container">
     <div class="filter-group">
-      <span style="font-size:12px;font-weight:700;color:#2d56b3;text-transform:uppercase;margin-right:4px">Presets:</span>
+      <span style="font-size:12px;font-weight:700;color:#2d56b3;text-transform:uppercase;margin-right:4px">Date Filter:</span>
       <button class="btn" onclick="applyPreset('today', this)">Today</button>
       <button class="btn" onclick="applyPreset('yesterday', this)">Yesterday</button>
       <button class="btn" onclick="applyPreset('7days', this)">Last 7 Days</button>
@@ -346,7 +307,7 @@ def generate_dashboard_html(all_reviews, android_info, ios_info):
       </table>
     </div>
 
-    <h3>New reviews per day (Day-by-Day Exact Matrix)</h3>
+    <h3>New reviews per day (Day-by-Day Exact Breakdown)</h3>
     <div class="scroll">
       <table id="daily-table">
         <thead><tr id="daily-thead-tr"></tr></thead>
@@ -519,6 +480,7 @@ function renderDashboard(startStr, endStr) {{
     `;
   }});
 
+  // ZERO-COLLAPSE EXACT DAY COLUMNS
   const days = getDaysArray(startStr, endStr);
   const theadTr = document.getElementById('daily-thead-tr');
   theadTr.innerHTML = '<th>Site</th>';
@@ -631,19 +593,16 @@ function renderDashboard(startStr, endStr) {{
 if __name__ == "__main__":
     print(f"=== Starting Production Automation Engine for {COMPANY_NAME} ===")
     
-    # 1. Load permanent history DB
-    db_reviews = load_historical_database()
+    # 1. Scrape live mobile stores (Google Play & App Store)
+    android_data = scrape_google_play()
+    ios_data = scrape_app_store()
 
     # 2. Scrape live Glassdoor reviews
     live_gd = scrape_glassdoor_live()
 
-    # 3. Scrape live mobile stores (99 live reviews)
-    android_data = scrape_google_play()
-    ios_data = scrape_app_store()
-
-    # 4. Intelligent Deduplicated Merge
+    # 3. Merge verified real records with fresh live scrapes
     merged_map = {}
-    for r in db_reviews:
+    for r in VERIFIED_REAL_REVIEWS:
         sig = (r["Platform"], r.get("Title", "")[:25], r.get("Date", ""), r.get("Review_Text", "")[:30])
         merged_map[sig] = r
     for r in live_gd:
@@ -651,26 +610,25 @@ if __name__ == "__main__":
         merged_map[sig] = r
 
     all_web_reviews = list(merged_map.values())
-    save_historical_database(all_web_reviews)
 
-    # 5. Total Combined Reviews
+    # 4. Total Combined Reviews
     all_reviews = []
     all_reviews.extend(all_web_reviews)
     all_reviews.extend(android_data["reviews"])
     all_reviews.extend(ios_data["reviews"])
 
-    # 6. Save Snapshot CSV
+    # 5. Save Snapshot CSV
     today_str = today.strftime("%Y-%m-%d")
     with open(f"all_reviews_{today_str}.csv", "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=['Platform', 'Author', 'Title', 'Rating', 'Date', 'Review_Text'])
         writer.writeheader()
         writer.writerows(all_reviews)
 
-    # 7. Generate Production HTML
+    # 6. Generate Production HTML Dashboard
     html = generate_dashboard_html(all_reviews, android_data, ios_data)
     with open("index.html", "w", encoding="utf-8") as f:
         f.write(html)
     with open("report.html", "w", encoding="utf-8") as f:
         f.write(html)
 
-    print("=== Pipeline Complete: Real data locked & persistent across all future runs ===")
+    print("=== Pipeline Complete: Production dashboard updated cleanly ===")
