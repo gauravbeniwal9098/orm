@@ -2,8 +2,8 @@ name: Multi-Platform Review Report Generator
 
 on:
   schedule:
-    - cron: '0 2 * * *'  # Har roz subah live run hoga
-  workflow_dispatch:      # Manual trigger
+    - cron: '0 2 * * *'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -21,20 +21,18 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install Dependencies
-        run: pip install -r requirements.txt
+      - name: Install Python Dependencies
+        run: pip install requests beautifulsoup4 google-play-scraper
 
-      - name: Run Master Scraper Engine
+      - name: Run ZenRows Review Scraper
         env:
-          SCRAPER_API_KEY: "20bda77b6873229d657469b817a75238"
-          GLASSDOOR_COOKIE: ${{ secrets.GLASSDOOR_COOKIE }}
-          INDEED_COOKIE: ${{ secrets.INDEED_COOKIE }}
+          ZENROWS_API_KEY: ${{ secrets.ZENROWS_API_KEY }}
         run: python scraper.py
 
       - name: Auto Commit Dashboard & Data
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add index.html report.html *.csv
-          git commit -m "Authenticated Live Reviews Update [skip ci]" || echo "No changes to commit"
+          git add index.html report.html *.csv *.json
+          git commit -m "ZenRows live review sync [skip ci]" || echo "No changes to commit"
           git push
