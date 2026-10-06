@@ -24,15 +24,13 @@ jobs:
       - name: Install Python Dependencies
         run: pip install requests beautifulsoup4 google-play-scraper
 
-      - name: Run ZenRows Review Scraper
-        env:
-          ZENROWS_API_KEY: ${{ secrets.ZENROWS_API_KEY }}
+      - name: Run Master ZenRows Review Scraper
         run: python scraper.py
 
       - name: Auto Commit Dashboard & Data
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add index.html report.html *.csv *.json
-          git commit -m "ZenRows live review sync [skip ci]" || echo "No changes to commit"
+          git add index.html report.html reviews_database.json *.csv
+          git commit -m "Auto sync live review dashboard [skip ci]" || echo "No changes to commit"
           git push
