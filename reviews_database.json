@@ -32,30 +32,6 @@
     "Review_Text": "The team is easy to work with and people are willing to help when you run into a problem. Good knowledge sharing, and everyone generally works together."
   },
   {
-    "Platform": "Glassdoor",
-    "Author": "Software Engineer",
-    "Title": "Collaborative culture and great learning opportunities",
-    "Rating": 5,
-    "Date": "2026-09-23",
-    "Review_Text": "Working at Altametrics has been a positive experience. Direct engagement with enterprise restaurant software products and supportive team leads."
-  },
-  {
-    "Platform": "Glassdoor",
-    "Author": "Client Support Specialist",
-    "Title": "Good place for career development and client operations",
-    "Rating": 5,
-    "Date": "2026-09-21",
-    "Review_Text": "Fast-paced environment with real-time exposure to client problem resolution and multi-unit scheduling workflows."
-  },
-  {
-    "Platform": "Glassdoor",
-    "Author": "QA Analyst",
-    "Title": "Positive environment and good management",
-    "Rating": 4,
-    "Date": "2026-09-19",
-    "Review_Text": "Solid enterprise software quality engineering lifecycle, good teamwork across cross-functional groups."
-  },
-  {
     "Platform": "Indeed",
     "Author": "Verified Employee",
     "Title": "Professional Environment with Growth Opportunities",
@@ -150,22 +126,6 @@
     "Rating": 5,
     "Date": "2026-01-28",
     "Review_Text": "The team is helpful and easy to work with. If you’re stuck, you can usually ask a teammate or senior without feeling awkward about it. Code reviews are done properly and are meant to improve the code, not criticize the person....Show more"
-  },
-  {
-    "Platform": "Indeed",
-    "Author": "Verified Employee",
-    "Title": "Decent place to work and learn as a Java developer",
-    "Rating": 5,
-    "Date": "2026-01-20",
-    "Review_Text": "The work was mostly backend development using Java, and I got to work on real features and APIs that were actually used in production. That part was good because it helped me understand how things work in a real system, not just theory....Show more"
-  },
-  {
-    "Platform": "Indeed",
-    "Author": "Verified Employee",
-    "Title": "Good Place for Career Growth and Teamwork",
-    "Rating": 5,
-    "Date": "2026-01-13",
-    "Review_Text": "Altametrics offers great opportunities for professional development. As a Business Analyst, I was able to take on more challenging projects and grow my skills quickly....Show more"
   },
   {
     "Platform": "Indeed",
