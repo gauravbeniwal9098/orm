@@ -34,13 +34,12 @@ PLATFORM_DATA = {
 }
 
 # ==============================================================
-# 1. DATE NORMALIZATION ENGINE
+# 1. UNIVERSAL DATE PARSER
 # ==============================================================
 def parse_any_date(raw_val):
     if not raw_val:
         return ""
     
-    # Epoch Milliseconds / Seconds
     if isinstance(raw_val, (int, float)):
         ts = float(raw_val)
         if ts > 1e11:
@@ -102,28 +101,9 @@ def parse_any_date(raw_val):
     return ""
 
 # ==============================================================
-# 2. ZENROWS SPECIALIZED FETCH ENGINES
+# 2. PROVEN ZENROWS AUTO FETCHER (MATCHES INDEED & COMPARABLY)
 # ==============================================================
-def fetch_glassdoor_zenrows(target_url):
-    print(f"\n[ZENROWS GLASSDOOR] Fetching with Residential Anti-Bot: {target_url}")
-    params = {
-        'url': target_url,
-        'apikey': ZENROWS_API_KEY,
-        'antibot': 'true',
-        'premium_proxy': 'true',
-        'js_render': 'true',
-        'proxy_country': 'us'
-    }
-    try:
-        resp = requests.get(ZENROWS_ENDPOINT, params=params, timeout=120)
-        print(f"[STATUS GLASSDOOR] HTTP {resp.status_code} | Bytes: {len(resp.text)}")
-        if resp.status_code == 200 and len(resp.text) > 1000:
-            return resp.text
-    except Exception as e:
-        print(f"[ERROR GLASSDOOR] {e}")
-    return ""
-
-def fetch_standard_zenrows(target_url):
+def fetch_via_zenrows(target_url):
     print(f"\n[ZENROWS] Requesting: {target_url}")
     params = {
         'url': target_url,
@@ -141,127 +121,139 @@ def fetch_standard_zenrows(target_url):
     return ""
 
 # ==============================================================
-# 3. GLASSDOOR LIVE PARSER (ROBUST JSON-LD + DOM)
+# 3. GLASSDOOR PROVEN MULTI-LAYER PARSER
 # ==============================================================
 def scrape_glassdoor_live():
-    url = "https://www.glassdoor.com/Reviews/Altametrics-Reviews-E393527.htm?sort.sortType=RD&sort.ascending=false"
-    html = fetch_glassdoor_zenrows(url)
     reviews = []
-    if not html:
-        return reviews
+    urls = [
+        "https://www.glassdoor.com/Reviews/Altametrics-Reviews-E393527.htm?sort.sortType=RD&sort.ascending=false",
+        "https://www.glassdoor.com/Reviews/Altametrics-Reviews-E393527.htm"
+    ]
 
-    # A. Raw Regex for Next.js __NEXT_DATA__
-    m_next = re.search(r'<script[^>]*id=["\']__NEXT_DATA__["\'][^>]*>(.*?)</script>', html, re.DOTALL)
-    if m_next:
-        try:
-            data = json.loads(m_next.group(1))
-            def walk(obj):
-                if isinstance(obj, dict):
-                    is_review = obj.get("__typename") in ("EmployerReview", "Review") or \
-                                ("ratingOverall" in obj and ("summary" in obj or "pros" in obj or "reviewBody" in obj))
-                    if is_review:
-                        title = obj.get("summary") or obj.get("title") or obj.get("headline") or ""
-                        pros = obj.get("pros") or ""
-                        cons = obj.get("cons") or ""
-                        body = obj.get("reviewBody") or obj.get("reviewText") or ""
-                        if not body and (pros or cons):
-                            body = f"Pros: {pros} | Cons: {cons}".strip(" |")
+    for url in urls:
+        html = fetch_via_zenrows(url)
+        if not html:
+            continue
 
-                        raw_dt = obj.get("reviewDateTime") or obj.get("datePublished") or obj.get("submissionDate") or obj.get("reviewDate")
-                        dt = parse_any_date(raw_dt)
+        soup = BeautifulSoup(html, 'html.parser')
 
-                        rating = obj.get("ratingOverall") or obj.get("rating") or obj.get("ratingValue") or 5
-                        try:
-                            rating = int(float(rating))
-                        except Exception:
-                            rating = 5
-
-                        job = obj.get("jobTitle")
-                        if isinstance(job, dict):
-                            job = job.get("text") or "Verified Employee"
-                        elif not job:
-                            job = "Verified Employee"
-
-                        if (title or body) and dt:
-                            reviews.append({
-                                "Platform": "Glassdoor",
-                                "Author": str(job),
-                                "Title": str(title) if title else "Employee Review",
-                                "Rating": rating,
-                                "Date": dt,
-                                "Review_Text": str(body) if body else str(title)
-                            })
-                    for v in obj.values():
-                        walk(v)
-                elif isinstance(obj, list):
-                    for item in obj:
-                        walk(item)
-            walk(data)
-        except Exception as e:
-            print(f"[GLASSDOOR JSON PARSE WARN] {e}")
-
-    # B. Apollo State Fallback
-    if not reviews:
-        m_apollo = re.search(r'window\.__APOLLO_STATE__\s*=\s*({.+?});\s*</script>', html, re.DOTALL)
-        if m_apollo:
+        # Layer 1: Google SEO Schema (JSON-LD)
+        for s in soup.find_all('script', type='application/ld+json'):
             try:
-                data = json.loads(m_apollo.group(1))
-                for k, obj in data.items():
-                    if isinstance(obj, dict) and (obj.get("__typename") == "EmployerReview" or "ratingOverall" in obj):
-                        title = obj.get("summary") or obj.get("title") or ""
-                        pros = obj.get("pros") or ""
-                        cons = obj.get("cons") or ""
-                        body = obj.get("reviewBody") or f"Pros: {pros} | Cons: {cons}".strip(" |")
-                        raw_dt = obj.get("reviewDateTime") or obj.get("datePublished")
-                        dt = parse_any_date(raw_dt)
-                        rating = obj.get("ratingOverall") or 5
+                raw_txt = s.string or s.get_text() or "{}"
+                data = json.loads(raw_txt)
+                items = data if isinstance(data, list) else [data]
+                for item in items:
+                    revs = []
+                    if item.get("@type") == "Review":
+                        revs.append(item)
+                    elif "review" in item and isinstance(item["review"], list):
+                        revs.extend(item["review"])
+                    elif "review" in item and isinstance(item["review"], dict):
+                        revs.append(item["review"])
+
+                    for r in revs:
+                        t = r.get("name") or r.get("headline") or "Employee Review"
+                        b = r.get("reviewBody") or r.get("description") or ""
+                        d = parse_any_date(r.get("datePublished") or r.get("dateCreated"))
+                        rating_v = r.get("reviewRating", {}).get("ratingValue", 5) if isinstance(r.get("reviewRating"), dict) else 5
                         try:
-                            rating = int(float(rating))
+                            rt = int(float(rating_v))
                         except Exception:
-                            rating = 5
-                        if (title or body) and dt:
+                            rt = 5
+                        auth = r.get("author", {})
+                        a_name = auth.get("name") if isinstance(auth, dict) else (auth or "Verified Employee")
+                        if (t or b) and d:
                             reviews.append({
                                 "Platform": "Glassdoor",
-                                "Author": "Verified Employee",
-                                "Title": str(title) if title else "Employee Review",
-                                "Rating": rating,
-                                "Date": dt,
-                                "Review_Text": str(body) if body else str(title)
+                                "Author": str(a_name),
+                                "Title": str(t),
+                                "Rating": rt,
+                                "Date": d,
+                                "Review_Text": str(b) if b else str(t)
                             })
             except Exception:
                 pass
 
-    # C. DOM Element Fallback
-    if not reviews:
-        soup = BeautifulSoup(html, 'html.parser')
-        cards = soup.find_all(attrs={"data-test": re.compile(r"review-card|empReview", re.I)}) or \
-                soup.find_all("li", class_=re.compile(r"ReviewCard|noBorder")) or \
-                soup.find_all("div", class_=re.compile(r"empReview"))
-        for c in cards:
-            t = c.find(attrs={"data-test": "review-title"}) or c.find(["h2", "h3"])
-            p_el = c.find(attrs={"data-test": "review-text-pros"})
-            c_el = c.find(attrs={"data-test": "review-text-cons"})
-            b_el = c.find(attrs={"data-test": "review-body"}) or c.find("p")
-            
-            body_txt = ""
-            if p_el or c_el:
-                body_txt = f"Pros: {p_el.get_text(strip=True) if p_el else ''} | Cons: {c_el.get_text(strip=True) if c_el else ''}".strip(" |")
-            elif b_el:
-                body_txt = b_el.get_text(strip=True)
+        # Layer 2: Next.js __NEXT_DATA__
+        m_next = re.search(r'<script[^>]*id=["\']__NEXT_DATA__["\'][^>]*>(.*?)</script>', html, re.DOTALL)
+        if m_next:
+            try:
+                next_data = json.loads(m_next.group(1))
+                def walk(obj):
+                    if isinstance(obj, dict):
+                        is_review = obj.get("__typename") in ("EmployerReview", "Review") or \
+                                    ("ratingOverall" in obj and ("summary" in obj or "pros" in obj or "reviewBody" in obj))
+                        if is_review:
+                            title = obj.get("summary") or obj.get("title") or obj.get("headline") or ""
+                            pros = obj.get("pros") or ""
+                            cons = obj.get("cons") or ""
+                            body = obj.get("reviewBody") or obj.get("reviewText") or ""
+                            if not body and (pros or cons):
+                                body = f"Pros: {pros} | Cons: {cons}".strip(" |")
 
-            d_el = c.find(attrs={"data-test": "review-date"}) or c.find(class_=re.compile(r"reviewDate|middle", re.I))
-            dt = parse_any_date(d_el.get_text(strip=True) if d_el else "")
+                            raw_dt = obj.get("reviewDateTime") or obj.get("datePublished") or obj.get("submissionDate")
+                            dt = parse_any_date(raw_dt)
+                            rating = obj.get("ratingOverall") or obj.get("rating") or 5
+                            try:
+                                rating = int(float(rating))
+                            except Exception:
+                                rating = 5
 
-            title_txt = t.get_text(strip=True) if t else ""
-            if (title_txt or body_txt) and dt:
-                reviews.append({
-                    "Platform": "Glassdoor",
-                    "Author": "Verified Employee",
-                    "Title": title_txt if title_txt else "Employee Review",
-                    "Rating": 5,
-                    "Date": dt,
-                    "Review_Text": body_txt if body_txt else title_txt
-                })
+                            job = obj.get("jobTitle")
+                            job_name = job.get("text") if isinstance(job, dict) else (job or "Verified Employee")
+
+                            if (title or body) and dt:
+                                reviews.append({
+                                    "Platform": "Glassdoor",
+                                    "Author": str(job_name),
+                                    "Title": str(title) if title else "Employee Review",
+                                    "Rating": rating,
+                                    "Date": dt,
+                                    "Review_Text": str(body) if body else str(title)
+                                })
+                        for v in obj.values():
+                            walk(v)
+                    elif isinstance(obj, list):
+                        for item in obj:
+                            walk(item)
+                walk(next_data)
+            except Exception:
+                pass
+
+        # Layer 3: DOM Fallback
+        if not reviews:
+            cards = soup.find_all(attrs={"data-test": re.compile(r"review-card|empReview", re.I)}) or \
+                    soup.find_all("li", class_=re.compile(r"ReviewCard|noBorder")) or \
+                    soup.find_all("div", class_=re.compile(r"empReview"))
+            for c in cards:
+                t = c.find(attrs={"data-test": "review-title"}) or c.find(["h2", "h3"])
+                p_el = c.find(attrs={"data-test": "review-text-pros"})
+                c_el = c.find(attrs={"data-test": "review-text-cons"})
+                b_el = c.find(attrs={"data-test": "review-body"}) or c.find("p")
+                
+                body_txt = ""
+                if p_el or c_el:
+                    body_txt = f"Pros: {p_el.get_text(strip=True) if p_el else ''} | Cons: {c_el.get_text(strip=True) if c_el else ''}".strip(" |")
+                elif b_el:
+                    body_txt = b_el.get_text(strip=True)
+
+                d_el = c.find(attrs={"data-test": "review-date"}) or c.find(class_=re.compile(r"reviewDate|middle", re.I))
+                dt = parse_any_date(d_el.get_text(strip=True) if d_el else "")
+
+                title_txt = t.get_text(strip=True) if t else ""
+                if (title_txt or body_txt) and dt:
+                    reviews.append({
+                        "Platform": "Glassdoor",
+                        "Author": "Verified Employee",
+                        "Title": title_txt if title_txt else "Employee Review",
+                        "Rating": 5,
+                        "Date": dt,
+                        "Review_Text": body_txt if body_txt else title_txt
+                    })
+
+        if reviews:
+            break
 
     seen = set()
     clean_reviews = []
@@ -279,7 +271,7 @@ def scrape_glassdoor_live():
 # ==============================================================
 def scrape_indeed_live():
     url = "https://www.indeed.com/cmp/Altametrics/reviews?sort=date"
-    html = fetch_standard_zenrows(url)
+    html = fetch_via_zenrows(url)
     reviews = []
     if html:
         soup = BeautifulSoup(html, 'html.parser')
@@ -308,7 +300,7 @@ def scrape_indeed_live():
 # ==============================================================
 def scrape_comparably_live():
     url = "https://www.comparably.com/companies/altametrics/reviews"
-    html = fetch_standard_zenrows(url)
+    html = fetch_via_zenrows(url)
     reviews = []
     if not html:
         return reviews
@@ -375,7 +367,7 @@ def save_database(records_list):
         pass
 
 # ==============================================================
-# 7. LIVE MOBILE APP STORES (GOOGLE PLAY & APP STORE USA)
+# 7. LIVE MOBILE APP STORES (USA)
 # ==============================================================
 def scrape_google_play():
     app_info = {"rating": 4.73, "ratings_count": 7850, "reviews_count": "7,850", "installs": "100,000+", "reviews": []}
@@ -435,7 +427,7 @@ def scrape_app_store():
     return app_info
 
 # ==============================================================
-# 8. MASTER DASHBOARD HTML
+# 8. DASHBOARD HTML GENERATOR
 # ==============================================================
 def generate_dashboard_html(all_reviews, android_info, ios_info):
     reviews_json = json.dumps(all_reviews)
@@ -654,12 +646,6 @@ function renderDashboard(startStr, endStr) {{
     webReviewsByPlat[r.Platform].push(r);
   }});
 
-  const mobileReviewsByPlat = {{}};
-  filteredMobileReviews.forEach(r => {{
-    if (!mobileReviewsByPlat[r.Platform]) mobileReviewsByPlat[r.Platform] = [];
-    mobileReviewsByPlat[r.Platform].push(r);
-  }});
-
   let totalAllReviews = 0;
   let weightedSum = 0;
   Object.keys(PLATFORM_DATA).forEach(k => {{
@@ -779,20 +765,20 @@ function renderDashboard(startStr, endStr) {{
 if __name__ == "__main__":
     print(f"=== Starting Production Sync Engine for {COMPANY_NAME} ===")
     
-    # 1. Load clean historical records
+    # 1. Load historical database
     db_map = load_database()
 
-    # 2. Live Scrapes (Indeed, Glassdoor, Comparably)
+    # 2. Scrape live web platforms via ZenRows
     live_scrapes = []
     live_scrapes.extend(scrape_indeed_live())
     live_scrapes.extend(scrape_glassdoor_live())
     live_scrapes.extend(scrape_comparably_live())
 
-    # 3. Live Mobile Scrapes
+    # 3. Scrape live mobile app stores
     android_data = scrape_google_play()
     ios_data = scrape_app_store()
 
-    # 4. Ingest and persist all fresh web reviews
+    # 4. Ingest and save
     for r in live_scrapes:
         sig = (r["Platform"], r.get("Title", "")[:25], r.get("Date", ""), r.get("Review_Text", "")[:30])
         db_map[sig] = r
@@ -800,13 +786,13 @@ if __name__ == "__main__":
     accumulated_web_reviews = list(db_map.values())
     save_database(accumulated_web_reviews)
 
-    # 5. Combined reviews pool
+    # 5. Combined reviews
     all_reviews = []
     all_reviews.extend(accumulated_web_reviews)
     all_reviews.extend(android_data["reviews"])
     all_reviews.extend(ios_data["reviews"])
 
-    # 6. Snapshot CSV & HTML
+    # 6. Save snapshot CSV & render HTML
     today_str = today.strftime("%Y-%m-%d")
     with open(f"all_reviews_{today_str}.csv", "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=['Platform', 'Author', 'Title', 'Rating', 'Date', 'Review_Text'])
