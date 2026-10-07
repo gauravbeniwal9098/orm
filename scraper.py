@@ -20,8 +20,22 @@ DATABASE_FILE = "reviews_database.json"
 ZENROWS_API_KEY = os.environ.get("ZENROWS_API_KEY", "c28ba3d6f2185439550e7251102d9c83137d269c")
 ZENROWS_ENDPOINT = "https://api.zenrows.com/v1/"
 
-# Triple single-quotes prevent any double-quote JSON conflict
-GLASSDOOR_COOKIE = '''gdId=9687b025-74cb-44e1-b3a8-21d18d3065aa; _optionalConsent=true; _ga=GA1.3.1023425105.1756294853; rl_page_init_referrer=RS_ENC_v3_Imh0dHBzOi8vd3d3Lmdvb2dsZS5jb20vIg%3D%3D; rl_page_init_referring_domain=RS_ENC_v3_Ind3dy5nb29nbGUuY29tIg%3D%3D; indeedCtk=1j9pcq28ji9du801; fpvc=69; otGeoUS=false; ki_r=aHR0cHM6Ly93d3cuZ29vZ2xlLmNvbS8%3D; g_state={"i_l":0,"i_ll":1788791892511,"i_e":{"enable_itp_optimization":24},"i_et":1788791892511,"i_b":"eZ2UjUgZpcKSF/O3Vw+0dvwKipP5RLRxsChKyHMk+Jk"}; ki_s=240461%3A0.0.0.0.0; rsSessionId=1791366267632; cdArr=; asst=1791366303.2; rl_user_id=RS_ENC_v3_IjE1MTA2NTE0NiI%3D; rl_trait=RS_ENC_v3_eyJsb2NrZWQgc3RhdGUiOiJvcGVuIiwidXNlciByb2xlIjoiQkFTSUMiLCJjb21tdW5pdHkgaWQiOiI2NDc1Y2FmZTFkYTljMDAwMjhjN2Y5MWIiLCJjb2xvciBzY2hlbWUiOiJMaWdodCIsImlzIHZhbGlkYXRlZCI6dHJ1ZSwiaXMgY29udHJpYnV0b3IiOnRydWV9; rl_anonymous_id=RS_ENC_v3_Ijk2ODdiMDI1LTc0Y2ItNDRlMS1iM2E4LTIxZDE4ZDMwNjVhYSI%3D; rsReferrerData=%7B%22currentPageRollup%22%3A%22%2Freviews%2Freviews%22%2C%22previousPageRollup%22%3A%22%2Freviews%2Faltametrics-reviews%22%2C%22currentPageAbstract%22%3A%22%2FReviews%2F%5BEMP%5D-Reviews-E%5BEID%5D.htm%22%2C%22previousPageAbstract%22%3A%22%2FReviews%2FAltametrics-Reviews-E%5BEID%5D.htm%22%2C%22currentPageFull%22%3A%22https%3A%2F%2Fwww.glassdoor.co.in%2FReviews%2FAltametrics-Reviews-E269429.htm%22%2C%22previousPageFull%22%3A%22https%3A%2F%2Fwww.glassdoor.co.in%2FReviews%2FAltametrics-Reviews-E269429.htm%22%7D; OptanonConsent=isGpcEnabled=0&datestamp=Wed+Oct+07+2026+15%3A15%3A28+GMT%2B0530+(India+Standard+Time)&version=202407.2.0&browserGpcFlag=0&isIABGlobal=false&hosts=&consentId=27239b62-00a9-4855-b7a9-8b6835719a87&interactionCount=1&isAnonUser=1&landingPath=NotLandingPage&groups=C0001%3A1%2CC0003%3A1%2CC0002%3A1%2CC0004%3A1%2CC0017%3A1&AwaitingReconsent=false; ki_t=1788791892495%3B1791366269120%3B1791366328672%3B15%3B31; rl_session=RS_ENC_v3_eyJhdXRvVHJhY2siOnRydWUsInRpbWVvdXQiOjE4MDAwMDAsImV4cGlyZXNBdCI6MTc5MTM2ODEyODczNCwiaWQiOjE3OTEzNjYyNjc2MzIsInNlc3Npb25TdGFydCI6ZmFsc2V9; _dd_s=aid=f71e2218-117b-4c8f-ab4b-b77019cff07a&rum=2&id=6008c079-f602-4564-9189-e9b320d96cf4&created=1791366267504&expire=1791367702948'''
+GLASSDOOR_COOKIE = (
+    "gdId=9687b025-74cb-44e1-b3a8-21d18d3065aa; _optionalConsent=true; _ga=GA1.3.1023425105.1756294853; "
+    "rl_page_init_referrer=RS_ENC_v3_Imh0dHBzOi8vd3d3Lmdvb2dsZS5jb20vIg%3D%3D; "
+    "rl_page_init_referring_domain=RS_ENC_v3_Ind3dy5nb29nbGUuY29tIg%3D%3D; indeedCtk=1j9pcq28ji9du801; "
+    "fpvc=69; otGeoUS=false; ki_r=aHR0cHM6Ly93d3cuZ29vZ2xlLmNvbS8%3D; "
+    'g_state={"i_l":0,"i_ll":1788791892511,"i_e":{"enable_itp_optimization":24},"i_et":1788791892511,"i_b":"eZ2UjUgZpcKSF/O3Vw+0dvwKipP5RLRxsChKyHMk+Jk"}; '
+    "ki_s=240461%3A0.0.0.0.0; rsSessionId=1791366267632; cdArr=; asst=1791366303.2; "
+    "rl_user_id=RS_ENC_v3_IjE1MTA2NTE0NiI%3D; "
+    'rl_trait=RS_ENC_v3_eyJsb2NrZWQgc3RhdGUiOiJvcGVuIiwidXNlciByb2xlIjoiQkFTSUMiLCJjb21tdW5pdHkgaWQiOiI2NDc1Y2FmZTFkYTljMDAwMjhjN2Y5MWIiLCJjb2xvciBzY2hlbWUiOiJMaWdodCIsImlzIHZhbGlkYXRlZCI6dHJ1ZSwiaXMgY29udHJpYnV0b3IiOnRydWV9; '
+    "rl_anonymous_id=RS_ENC_v3_Ijk2ODdiMDI1LTc0Y2ItNDRlMS1iM2E4LTIxZDE4ZDMwNjVhYSI%3D; "
+    "rsReferrerData=%7B%22currentPageRollup%22%3A%22%2Freviews%2Freviews%22%2C%22previousPageRollup%22%3A%22%2Freviews%2Faltametrics-reviews%22%2C%22currentPageAbstract%22%3A%22%2FReviews%2F%5BEMP%5D-Reviews-E%5BEID%5D.htm%22%2C%22previousPageAbstract%22%3A%22%2FReviews%2FAltametrics-Reviews-E%5BEID%5D.htm%22%2C%22currentPageFull%22%3A%22https%3A%2F%2Fwww.glassdoor.co.in%2FReviews%2FAltametrics-Reviews-E269429.htm%22%2C%22previousPageFull%22%3A%22https%3A%2F%2Fwww.glassdoor.co.in%2FReviews%2FAltametrics-Reviews-E269429.htm%22%7D; "
+    "OptanonConsent=isGpcEnabled=0&datestamp=Wed+Oct+07+2026+15%3A15%3A28+GMT%2B0530+(India+Standard+Time)&version=202407.2.0&browserGpcFlag=0&isIABGlobal=false&hosts=&consentId=27239b62-00a9-4855-b7a9-8b6835719a87&interactionCount=1&isAnonUser=1&landingPath=NotLandingPage&groups=C0001%3A1%2CC0003%3A1%2CC0002%3A1%2CC0004%3A1%2CC0017%3A1&AwaitingReconsent=false; "
+    "ki_t=1788791892495%3B1791366269120%3B1791366328672%3B15%3B31; "
+    "rl_session=RS_ENC_v3_eyJhdXRvVHJhY2siOnRydWUsInRpbWVvdXQiOjE4MDAwMDAsImV4cGlyZXNBdCI6MTc5MTM2ODEyODczNCwiaWQiOjE3OTEzNjYyNjc2MzIsInNlc3Npb25TdGFydCI6ZmFsc2V9; "
+    "_dd_s=aid=f71e2218-117b-4c8f-ab4b-b77019cff07a&rum=2&id=6008c079-f602-4564-9189-e9b320d96cf4&created=1791366267504&expire=1791367702948"
+)
 
 today = datetime.date.today()
 
@@ -63,24 +77,24 @@ def parse_any_date(raw_val):
         return today.strftime("%Y-%m-%d")
     if "yesterday" in s:
         return (today - timedelta(days=1)).strftime("%Y-%m-%d")
-    m_days = re.search(r'(\d+)\s+day', s)
+    m_days = re.search(r"(\d+)\s+day", s)
     if m_days:
         return (today - timedelta(days=int(m_days.group(1)))).strftime("%Y-%m-%d")
-    m_weeks = re.search(r'(\d+)\s+week', s)
+    m_weeks = re.search(r"(\d+)\s+week", s)
     if m_weeks:
         return (today - timedelta(days=int(m_weeks.group(1)) * 7)).strftime("%Y-%m-%d")
-    m_months = re.search(r'(\d+)\s+month', s)
+    m_months = re.search(r"(\d+)\s+month", s)
     if m_months:
         return (today - timedelta(days=int(m_months.group(1)) * 30)).strftime("%Y-%m-%d")
 
-    match_iso = re.search(r'(\d{4}-\d{2}-\d{2})', raw_str)
+    match_iso = re.search(r"(\d{4}-\d{2}-\d{2})", raw_str)
     if match_iso:
         return match_iso.group(1)
 
-    cleaned = re.sub(r'(\d+)(st|nd|rd|th)', r'\1', raw_str)
-    cleaned = re.sub(r'[,.]', '', cleaned).strip()
+    cleaned = re.sub(r"(\d+)(st|nd|rd|th)", r"\1", raw_str)
+    cleaned = re.sub(r"[,.]", "", cleaned).strip()
 
-    m_mdy = re.search(r'(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s+(\d{1,2})\s+(\d{4})', cleaned, re.I)
+    m_mdy = re.search(r"(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s+(\d{1,2})\s+(\d{4})", cleaned, re.I)
     if m_mdy:
         try:
             dt = datetime.datetime.strptime(f"{m_mdy.group(1)[:3]} {m_mdy.group(2)} {m_mdy.group(3)}", "%b %d %Y")
@@ -88,7 +102,7 @@ def parse_any_date(raw_val):
         except Exception:
             pass
 
-    m_dmy = re.search(r'(\d{1,2})\s+(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s+(\d{4})', cleaned, re.I)
+    m_dmy = re.search(r"(\d{1,2})\s+(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s+(\d{4})", cleaned, re.I)
     if m_dmy:
         try:
             dt = datetime.datetime.strptime(f"{m_dmy.group(1)} {m_dmy.group(2)[:3]} {m_dmy.group(3)}", "%d %b %Y")
@@ -99,22 +113,20 @@ def parse_any_date(raw_val):
     return ""
 
 def fetch_authenticated_zenrows(target_url, cookie_str=""):
-    print(f"\n[ZENROWS] Fetching: {target_url}")
     params = {
-        'url': target_url,
-        'apikey': ZENROWS_API_KEY,
-        'mode': 'auto',
-        'js_render': 'true'
+        "url": target_url,
+        "apikey": ZENROWS_API_KEY,
+        "mode": "auto",
+        "js_render": "true"
     }
     headers = {}
     if cookie_str:
-        params['custom_headers'] = 'true'
-        headers['Cookie'] = cookie_str
-        headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36'
+        params["custom_headers"] = "true"
+        headers["Cookie"] = cookie_str
+        headers["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
 
     try:
         resp = requests.get(ZENROWS_ENDPOINT, params=params, headers=headers, timeout=90)
-        print(f"[STATUS] HTTP {resp.status_code} | Bytes: {len(resp.text)}")
         if resp.status_code == 200 and len(resp.text) > 1000:
             return resp.text
     except Exception as e:
@@ -133,10 +145,9 @@ def scrape_glassdoor_live():
         if not html:
             continue
 
-        soup = BeautifulSoup(html, 'html.parser')
+        soup = BeautifulSoup(html, "html.parser")
 
-        # Schema JSON-LD
-        for s in soup.find_all('script', type='application/ld+json'):
+        for s in soup.find_all("script", type="application/ld+json"):
             try:
                 data = json.loads(s.string or s.get_text() or "{}")
                 items = data if isinstance(data, list) else [data]
@@ -165,11 +176,10 @@ def scrape_glassdoor_live():
             except Exception:
                 pass
 
-        # Next.js Data
-        m_next = re.search(r'<script[^>]*id=["\']__NEXT_DATA__["\'][^>]*>(.*?)</script>', html, re.DOTALL)
-        if m_next:
+        tag = soup.find("script", id="__NEXT_DATA__")
+        if tag and tag.string:
             try:
-                next_data = json.loads(m_next.group(1))
+                next_data = json.loads(tag.string)
                 def walk(obj):
                     if isinstance(obj, dict):
                         if obj.get("__typename") in ("EmployerReview", "Review") or ("ratingOverall" in obj and ("summary" in obj or "pros" in obj)):
@@ -225,12 +235,12 @@ def scrape_indeed_live():
     html = fetch_authenticated_zenrows(url)
     reviews = []
     if html:
-        soup = BeautifulSoup(html, 'html.parser')
+        soup = BeautifulSoup(html, "html.parser")
         cards = soup.find_all(attrs={"data-testid": "review-container"}) or soup.find_all("div", class_=re.compile(r"review|css-"))
         for c in cards:
             t = c.find(attrs={"data-testid": "title"}) or c.find(["h2", "h3"])
             b = c.find(attrs={"data-testid": "review-text"}) or c.find("span", class_=re.compile(r"text"))
-            d = c.find(attrs={"data-testid": "review-date"}) or c.find(string=re.compile(r'\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec|ago|\d{4})\b', re.I))
+            d = c.find(attrs={"data-testid": "review-date"}) or c.find(string=re.compile(r"\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec|ago|\d{4})\b", re.I))
             dt = parse_any_date(d.strip() if isinstance(d, str) else (d.get_text(strip=True) if d else ""))
             tt = t.get_text(strip=True) if t else ""
             bt = b.get_text(strip=True) if b else ""
@@ -248,7 +258,7 @@ def scrape_comparably_live():
     reviews = []
     if not html:
         return reviews
-    soup = BeautifulSoup(html, 'html.parser')
+    soup = BeautifulSoup(html, "html.parser")
     cards = soup.find_all("div", class_=re.compile(r"review|comment|quote|testimonial|card", re.I))
     for c in cards:
         p_elem = c.find(["p", "blockquote", "span"], class_=re.compile(r"text|content|body|quote", re.I)) or c.find("p")
@@ -260,7 +270,7 @@ def scrape_comparably_live():
         a_elem = c.find(class_=re.compile(r"author|user|role|dept|department", re.I))
         author = a_elem.get_text(strip=True) if a_elem else "Verified Employee"
         d_elem = c.find(class_=re.compile(r"date|time|posted|timestamp", re.I)) or \
-                 c.find(string=re.compile(r'\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec|ago|\d{4})\b', re.I))
+                 c.find(string=re.compile(r"\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec|ago|\d{4})\b", re.I))
         raw_dt = d_elem.strip() if isinstance(d_elem, str) else (d_elem.get_text(strip=True) if d_elem else "")
         dt = parse_any_date(raw_dt) or parse_any_date(txt)
         if (txt or title) and dt:
@@ -294,16 +304,17 @@ def save_database(records_list):
 def scrape_google_play():
     app_info = {"rating": 4.73, "ratings_count": 7850, "reviews_count": "7,850", "installs": "100,000+", "reviews": []}
     try:
-        details = gp_app(ANDROID_PKG, lang='en', country='us')
+        details = gp_app(ANDROID_PKG, lang="en", country="us")
         if details:
             app_info["rating"] = round(details.get("score", 4.73), 2)
             app_info["ratings_count"] = details.get("ratings", 7850)
-            app_info["reviews_count"] = f"{details.get('reviews', details.get('ratings', 7850)):,}"
-            app_info["installs"] = details.get("installs", "100,000+")
+            rev_cnt = details.get("reviews") or details.get("ratings") or 7850
+            app_info["reviews_count"] = f"{rev_cnt:,}"
+            app_info["installs"] = str(details.get("installs", "100,000+"))
     except Exception:
         pass
     try:
-        data, _ = gp_reviews(ANDROID_PKG, lang='en', country='us', sort=GpSort.NEWEST, count=50)
+        data, _ = gp_reviews(ANDROID_PKG, lang="en", country="us", sort=GpSort.NEWEST, count=50)
         for r in data:
             rev_dt = r.get("at")
             app_info["reviews"].append({
@@ -677,7 +688,7 @@ function renderDashboard(startStr, endStr) {{
 </body></html>"""
 
 # ==============================================================
-# PIPELINE EXECUTION (SAFE ISOLATION)
+# PIPELINE EXECUTION
 # ==============================================================
 if __name__ == "__main__":
     print(f"=== Starting Production Sync Engine for {COMPANY_NAME} ===")
