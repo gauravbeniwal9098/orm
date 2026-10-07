@@ -16,20 +16,36 @@
     "Review_Text": "I get to work on actual product requirements and solve issues that have a direct impact on the application. It has been a good experience for improving both technical skills and understanding how things work in a real production environment....Show more"
   },
   {
-    "Platform": "Indeed",
-    "Author": "Software Engineer, Costa Mesa, CA",
-    "Title": "A decent place for a software engineer to gain practical experience",
-    "Rating": 5,
-    "Date": "2026-08-25",
-    "Review_Text": "I got to work on different technical tasks and learned a lot about improving existing systems."
-  },
-  {
     "Platform": "Comparably",
     "Author": "Verified Employee",
     "Title": "Supportive leadership & strong culture",
     "Rating": 5,
     "Date": "2026-09-19",
     "Review_Text": "The team is easy to work with and people are willing to help when you run into a problem. Good knowledge sharing, and everyone generally works together."
+  },
+  {
+    "Platform": "Glassdoor",
+    "Author": "Software Engineer, Noida",
+    "Title": "Great culture, high ownership, and modern tech stack",
+    "Rating": 5,
+    "Date": "2026-09-24",
+    "Review_Text": "Working at Altametrics Noida gives great exposure to enterprise restaurant supply chain and workforce management systems. Strong engineering practices and supportive team leads."
+  },
+  {
+    "Platform": "Glassdoor",
+    "Author": "Product Operations Associate, Noida",
+    "Title": "Good collaborative workplace with steady growth",
+    "Rating": 5,
+    "Date": "2026-09-16",
+    "Review_Text": "Good work-life balance, collaborative management, and opportunity to work closely with global operations teams."
+  },
+  {
+    "Platform": "Indeed",
+    "Author": "Software Engineer, Costa Mesa, CA",
+    "Title": "A decent place for a software engineer to gain practical experience",
+    "Rating": 5,
+    "Date": "2026-08-25",
+    "Review_Text": "I got to work on different technical tasks and learned a lot about improving existing systems."
   },
   {
     "Platform": "Indeed",
